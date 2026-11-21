@@ -43,6 +43,15 @@
 .lesson-text{will-change:height,opacity;contain:layout}
 .learn-tab{transition:background-color .2s ease,border-color .2s ease,color .2s ease}
 
+
+
+/* A cor de cada letra so aparece ao virar a face do quadrado. */
+.tile.revealing{animation:tileFaceTurn .43s ease-in-out both;transform-origin:center center;backface-visibility:hidden}
+@keyframes tileFaceTurn{0%{transform:rotateX(0)}48%{transform:rotateX(-90deg)}52%{transform:rotateX(-90deg)}100%{transform:rotateX(0)}}
+.hint-panel.hint-highlight{animation:hintBorderPulse .65s ease-out}
+@keyframes hintBorderPulse{0%{border-color:#72afff;box-shadow:0 0 0 2px #659bdb37}100%{border-color:#414852;box-shadow:0 0 0 0 #659bdb00}}
+@media(prefers-reduced-motion:reduce){.tile.revealing,.hint-panel.hint-highlight{animation:none}}
+
 </style></head>
 <body><div class="app">
 <header class="topbar"><button id="homeButton" class="icon-button" aria-label="Página inicial" title="Página inicial">⌂</button><h1>Filosofle</h1><button id="helpButton" class="icon-button" aria-label="Como jogar" title="Como jogar">?</button></header>
@@ -756,10 +765,31 @@ function lengthOf(c){return normalize(c.word).length;}
 function allowed(c,level){return c.level===Number(level);}
 function pool(topic=selectedTopic,level=selectedLevel){return CONCEPTS.filter(c=>(topic==='all'||c.topic===topic)&&allowed(c,level));}
 function shuffle(xs){const a=[...xs];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function pickOne(xs,exclude=[]){if(!xs.length)return null;const excluded=new Set([...store.recent.slice(-15),...exclude].map(normalize));const fresh=xs.filter(x=>!excluded.has(normalize(x.word)));return shuffle(fresh.length?fresh:xs)[0];}
+function pickOne(xs,exclude=[]){
+  if(!xs.length)return null;
+  const unwanted=new Set(exclude.map(normalize));
+  const available=xs.filter(c=>!unwanted.has(normalize(c.word)));
+  if(!available.length)return null;
+  const recent15=new Set(store.recent.slice(-15));
+  const recent4=new Set(store.recent.slice(-4));
+  // Evita repetições próximas sem travar quando o assunto tem poucas palavras.
+  const far=available.filter(c=>!recent15.has(normalize(c.word)));
+  const near=available.filter(c=>!recent4.has(normalize(c.word)));
+  const choices=far.length?far:near.length?near:available;
+  const weights=choices.map(c=>{
+    const data=store.studied[normalize(c.word)];
+    if(!data||!data.plays)return 9; // Novidades são prioritárias.
+    const failures=Math.max(0,(data.plays||0)-(data.wins||0));
+    if(failures>0)return Math.min(7,3+failures); // Reapresenta dificuldades antigas.
+    return Math.max(0.6,2/(1+Math.max(0,data.plays-1)*0.6));
+  });
+  let point=Math.random()*weights.reduce((a,b)=>a+b,0);
+  for(let i=0;i<choices.length;i++){point-=weights[i];if(point<0)return choices[i];}
+  return choices[choices.length-1];
+}
 function show(view,tab){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id===view));const targetTab=tab||(view==='challenges'?'challenges':view==='collection'?'collection':'home');document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===targetTab));window.scrollTo({top:0,behavior:'instant'});if(view==='home')updateHome();if(view==='challenges')updateChallengeNote();if(view==='collection')renderCollection();}
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>el.classList.remove('show'),2600);}
-function confirmExit(){if(round&&!round.done&&document.getElementById('game').classList.contains('active')){return window.confirm(session?.kind==='daily'?'Sair do desafio diário? Suas tentativas ficarão salvas para continuar depois.':'Sair da partida? As tentativas desta palavra não serão salvas.');}return true;}
+function confirmExit(){if(round?.revealing){toast('Acompanhe a revelação das letras antes de sair.');return false;}if(round&&!round.done&&document.getElementById('game').classList.contains('active')){return window.confirm(session?.kind==='daily'?'Sair do desafio diário? Suas tentativas ficarão salvas para continuar depois.':'Sair da partida? As tentativas desta palavra não serão salvas.');}return true;}
 function exitCurrent(view='home'){if(!confirmExit())return;clearInterval(timer);timer=null;round=null;session=null;reviewOnly=false;show(view);}
 function updateHome(){const discovered=Object.values(store.studied).filter(x=>x.won).length;$('homeStats').innerHTML=`<div class="stat"><b>${store.played}</b><span>Partidas</span></div><div class="stat"><b>${store.wins}</b><span>Vitórias</span></div><div class="stat"><b>${discovered}</b><span>Descobertas</span></div>`;updateDailyButtons();}
 function updateChallengeNote(){const day=localDayKey(),done=Boolean(store.daily[day]),resume=!done&&store.dailyProgress?.day===day;$('dailyNote').textContent=done?'Desafio diário concluído. Uma nova palavra ficará disponível amanhã.':resume?'Sua partida está salva. Continue de onde parou.':'O desafio do dia só pode ser jogado uma vez por dia neste navegador.';updateDailyButtons();}
@@ -778,24 +808,134 @@ function beginDaily(){const day=localDayKey();if(store.daily[day]){toast('O desa
 function beginJourney(){if(!confirmExit())return;const picks=[],seen=new Set();for(const c of shuffle(CONCEPTS.filter(c=>c.level<=3))){if(!seen.has(c.topic)){picks.push(c);seen.add(c.topic);}if(picks.length===3)break;}session={kind:'journey',items:picks,index:0,timed:false,level:2,results:[]};beginRound();}
 function beginNoHints(){if(!confirmExit())return;const item=pickOne(CONCEPTS.filter(c=>allowed(c,3)));session={kind:'nohint',items:[item],index:0,timed:false,level:3,results:[]};beginRound();}
 function attemptsFor(item){if(session.kind==='daily'||session.kind==='journey')return 6;return session.level===1?7:6;}
-function beginRound(){clearInterval(timer);reviewOnly=false;const item=session.items[session.index];round={item,typed:'',guesses:[],evaluations:[],hintsUsed:0,max:attemptsFor(item),done:false,won:false,stars:0,quizDone:false};$('gameTitle').textContent=session.kind==='journey'?`Trilha · descoberta ${session.index+1} de ${session.items.length}`:session.kind==='daily'?'Desafio do dia':session.kind==='nohint'?'Palavra sem pistas':'Descubra a palavra';$('gameTopic').textContent=`${item.topic} · ${lengthOf(item)} letras`;$('gameMessage').textContent='Use o teclado para descobrir a palavra.';$('board').style.setProperty('--len',lengthOf(item));$('board').classList.toggle('long',lengthOf(item)>=8);$('hintPanel').hidden=session.kind==='nohint';$('hintList').innerHTML='';$('hintEmpty').hidden=false;updateHintControls();$('journeyProgress').hidden=session.kind!=='journey';if(session.kind==='journey'){$('journeyProgress').innerHTML=session.items.map((_,i)=>`<i class="${i<session.index?'done':i===session.index?'current':''}"></i>`).join('');}renderBoard();renderKeyboard();updateAttemptInfo();show('game',session.kind==='free'?'home':'challenges');if(session.timed){let seconds=session.level>=3?150:120;const end=Date.now()+seconds*1000;const tick=()=>{if(!round||round.done){clearInterval(timer);return;}seconds=Math.max(0,Math.ceil((end-Date.now())/1000));$('gameClock').textContent=`◷ ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;if(seconds===0){clearInterval(timer);endRound(false,'O tempo terminou.');}};timer=setInterval(tick,250);tick();}else $('gameClock').textContent='Sem cronômetro';}
+function beginRound(){clearInterval(timer);reviewOnly=false;const item=session.items[session.index];round={item,typed:'',guesses:[],evaluations:[],hintsUsed:0,max:attemptsFor(item),done:false,won:false,stars:0,quizDone:false,revealing:false};$('gameTitle').textContent=session.kind==='journey'?`Trilha · descoberta ${session.index+1} de ${session.items.length}`:session.kind==='daily'?'Desafio do dia':session.kind==='nohint'?'Palavra sem pistas':'Descubra a palavra';$('gameTopic').textContent=`${item.topic} · ${lengthOf(item)} letras`;$('gameMessage').textContent='Use o teclado para descobrir a palavra.';$('board').style.setProperty('--len',lengthOf(item));$('board').classList.toggle('long',lengthOf(item)>=8);$('hintPanel').hidden=session.kind==='nohint';$('hintList').innerHTML='';$('hintEmpty').hidden=false;updateHintControls();$('journeyProgress').hidden=session.kind!=='journey';if(session.kind==='journey'){$('journeyProgress').innerHTML=session.items.map((_,i)=>`<i class="${i<session.index?'done':i===session.index?'current':''}"></i>`).join('');}renderBoard();renderKeyboard();updateAttemptInfo();show('game',session.kind==='free'?'home':'challenges');if(session.timed){let seconds=session.level>=3?150:120;const end=Date.now()+seconds*1000;const tick=()=>{if(!round||round.done){clearInterval(timer);return;}seconds=Math.max(0,Math.ceil((end-Date.now())/1000));$('gameClock').textContent=`◷ ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;if(seconds===0&&!round.revealing){clearInterval(timer);endRound(false,'O tempo terminou.');}};timer=setInterval(tick,250);tick();}else $('gameClock').textContent='Sem cronômetro';}
 function updateAttemptInfo(){$('attemptsText').textContent=`Tentativa ${Math.min(round.guesses.length+1,round.max)} de ${round.max}`;}
-function renderBoard(animateRow=-1){const board=$('board'),len=lengthOf(round.item);board.textContent='';for(let r=0;r<round.max;r++){const row=document.createElement('div');row.className='board-row';row.setAttribute('role','row');const letters=r<round.guesses.length?round.guesses[r]:r===round.guesses.length?round.typed:'';const evaluation=r<round.evaluations.length?round.evaluations[r]:[];for(let j=0;j<len;j++){const tile=document.createElement('div');tile.className='tile';tile.setAttribute('role','gridcell');tile.textContent=letters[j]||'';if(letters[j]&&!evaluation.length)tile.classList.add('filled');if(evaluation[j])tile.classList.add(evaluation[j]);if(r===animateRow){tile.classList.add('flip');tile.style.animationDelay=`${j*45}ms`;}row.appendChild(tile);}board.appendChild(row);} }
+function renderBoard(animateRow=-1){
+  const board=$('board'),len=lengthOf(round.item);
+  board.textContent='';
+  for(let r=0;r<round.max;r++){
+    const row=document.createElement('div');row.className='board-row';row.setAttribute('role','row');
+    const letters=r<round.guesses.length?round.guesses[r]:r===round.guesses.length?round.typed:'';
+    const evaluation=r<round.evaluations.length?round.evaluations[r]:[];
+    for(let j=0;j<len;j++){
+      const tile=document.createElement('div');tile.className='tile';tile.setAttribute('role','gridcell');
+      tile.textContent=letters[j]||'';
+      if(letters[j]&&(!evaluation.length||r===animateRow))tile.classList.add('filled');
+      if(evaluation[j]&&r!==animateRow)tile.classList.add(evaluation[j]);
+      row.appendChild(tile);
+    }
+    board.appendChild(row);
+  }
+}
+function revealTiles(rowIndex,afterReveal){
+  const currentRound=round;
+  const row=$('board').children[rowIndex];
+  const tiles=row?[...row.querySelectorAll('.tile')]:[];
+  if(!tiles.length||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    if(round===currentRound){renderBoard();afterReveal();}
+    return;
+  }
+  const delay=105,flipTime=430;
+  tiles.forEach((tile,i)=>{
+    setTimeout(()=>{
+      if(round!==currentRound)return;
+      tile.classList.add('revealing');
+      setTimeout(()=>{
+        if(round!==currentRound)return;
+        tile.classList.remove('filled');
+        tile.classList.add(currentRound.evaluations[rowIndex][i]);
+      },flipTime/2);
+    },i*delay);
+  });
+  setTimeout(()=>{
+    if(round!==currentRound)return;
+    renderBoard();
+    afterReveal();
+  },(tiles.length-1)*delay+flipTime+70);
+}
 const ROWS=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
 function renderKeyboard(){const panel=$('keyboard');panel.textContent='';const priority={absent:1,present:2,exact:3},statuses={};for(let i=0;i<round.guesses.length;i++){for(let j=0;j<round.guesses[i].length;j++){const k=round.guesses[i][j],s=round.evaluations[i][j];if(!statuses[k]||priority[s]>priority[statuses[k]])statuses[k]=s;}}const addKey=(text,label)=>{const btn=document.createElement('button');btn.type='button';btn.className='key'+(text==='ENTER'||text==='BACK'?' big':'')+(statuses[text]?' '+statuses[text]:'');btn.textContent=label||text;btn.setAttribute('aria-label',text==='BACK'?'Apagar':text==='ENTER'?'Confirmar tentativa':'Letra '+text);btn.addEventListener('click',()=>handleKey(text));return btn;};ROWS.forEach((line,i)=>{const row=document.createElement('div');row.className='key-row';if(i===2)row.appendChild(addKey('ENTER','ENTER'));for(const key of line)row.appendChild(addKey(key));if(i===2)row.appendChild(addKey('BACK','⌫'));panel.appendChild(row);});}
-function handleKey(raw){if(!round||round.done||!document.getElementById('game').classList.contains('active'))return;const key=normalize(raw);if(raw==='BACK'||raw==='Backspace'){round.typed=round.typed.slice(0,-1);renderBoard();saveDailyProgress();return;}if(raw==='ENTER'||raw==='Enter'){submitGuess();return;}if(key.length===1&&/^[A-Z]$/.test(key)&&round.typed.length<lengthOf(round.item)){round.typed+=key;renderBoard();saveDailyProgress();}}
+function handleKey(raw){if(!round||round.done||round.revealing||!document.getElementById('game').classList.contains('active'))return;const key=normalize(raw);if(raw==='BACK'||raw==='Backspace'){round.typed=round.typed.slice(0,-1);renderBoard();saveDailyProgress();return;}if(raw==='ENTER'||raw==='Enter'){submitGuess();return;}if(key.length===1&&/^[A-Z]$/.test(key)&&round.typed.length<lengthOf(round.item)){round.typed+=key;renderBoard();saveDailyProgress();}}
 function evaluateGuess(guess,target){const g=[...normalize(guess)],t=[...normalize(target)];const scores=Array(g.length).fill('absent'),available={};for(let i=0;i<t.length;i++){if(g[i]===t[i])scores[i]='exact';else available[t[i]]=(available[t[i]]||0)+1;}for(let i=0;i<g.length;i++){if(scores[i]==='exact')continue;if((available[g[i]]||0)>0){scores[i]='present';available[g[i]]--;}}return scores;}
-function submitGuess(){if(round.typed.length!==lengthOf(round.item)){toast(`A palavra precisa ter ${lengthOf(round.item)} letras.`);return;}const guess=round.typed;if(!checkGuessDictionary(guess))return;const scores=evaluateGuess(guess,round.item.word);round.guesses.push(guess);round.evaluations.push(scores);round.typed='';renderBoard(round.guesses.length-1);renderKeyboard();updateAttemptInfo();saveDailyProgress();if(normalize(guess)===normalize(round.item.word)){round.done=true;round.won=true;lockDailyResult(true);$('gameMessage').textContent='Palavra descoberta!';setTimeout(()=>endRound(true),Math.max(360,lengthOf(round.item)*45+250));}else if(round.guesses.length>=round.max){round.done=true;lockDailyResult(false);$('gameMessage').textContent='Tentativas encerradas.';setTimeout(()=>endRound(false),Math.max(360,lengthOf(round.item)*45+250));}else{revealHint();$('gameMessage').textContent=round.guesses.length<=3&&session.kind!=='nohint'?'Uma pista nova apareceu abaixo do teclado.':'Use as cores das letras para tentar novamente.';}}
+function submitGuess(){
+  if(round.revealing)return;
+  if(round.typed.length!==lengthOf(round.item)){toast(`A palavra precisa ter ${lengthOf(round.item)} letras.`);return;}
+  const guess=round.typed;
+  if(!checkGuessDictionary(guess))return;
+  const scores=evaluateGuess(guess,round.item.word);
+  round.guesses.push(guess);
+  round.evaluations.push(scores);
+  round.typed='';
+  round.revealing=true;
+  const row=round.guesses.length-1;
+  const won=normalize(guess)===normalize(round.item.word);
+  const lost=!won&&round.guesses.length>=round.max;
+  renderBoard(row);
+  saveDailyProgress();
+  $('gameMessage').textContent='Revelando as letras...';
+  revealTiles(row,()=>{
+    round.revealing=false;
+    renderKeyboard();
+    updateAttemptInfo();
+    if(won){
+      round.done=true;round.won=true;
+      lockDailyResult(true);
+      $('gameMessage').textContent=round.guesses.length===1?'Acerto de primeira!':round.guesses.length===round.max?'Vitória na última tentativa!':'Palavra descoberta!';
+      endRound(true);
+    }else if(lost){
+      round.done=true;
+      lockDailyResult(false);
+      $('gameMessage').textContent='Tentativas encerradas.';
+      endRound(false);
+    }else{
+      revealHint();
+      $('gameMessage').textContent=round.guesses.length<=3&&session.kind!=='nohint'?'Uma pista foi revelada abaixo do teclado.':'Use as cores para deduzir a próxima tentativa.';
+    }
+  });
+}
 function updateHintControls(){if(!round)return;$('hintCount').textContent=`${round.hintsUsed} de ${round.item.hints.length}`;}
-function revealHint(){if(!round||round.done||session.kind==='nohint'||round.hintsUsed>=round.item.hints.length)return;round.hintsUsed++;const li=document.createElement('li');li.textContent=round.item.hints[round.hintsUsed-1];li.setAttribute('aria-label',`Pista ${round.hintsUsed}: ${li.textContent}`);$('hintList').appendChild(li);$('hintEmpty').hidden=true;updateHintControls();saveDailyProgress();}
+function revealHint(){
+  if(!round||round.done||session.kind==='nohint'||round.hintsUsed>=round.item.hints.length)return;
+  round.hintsUsed++;
+  const li=document.createElement('li');
+  li.textContent=round.item.hints[round.hintsUsed-1];
+  li.setAttribute('aria-label',`Pista ${round.hintsUsed}: ${li.textContent}`);
+  $('hintList').appendChild(li);
+  $('hintEmpty').hidden=true;
+  updateHintControls();
+  const panel=$('hintPanel');panel.classList.remove('hint-highlight');
+  void panel.offsetWidth; // Reinicia o efeito discreto em cada descoberta.
+  panel.classList.add('hint-highlight');
+  saveDailyProgress();
+}
 function starRating(){if(!round.won)return 0;const n=round.guesses.length;return n<=2?3:n<=4?2:1;}
-function endRound(won,note=''){if(!round||round.recorded)return;round.recorded=true;round.done=true;round.won=won;clearInterval(timer);timer=null;round.stars=starRating();const key=normalize(round.item.word);store.played++;if(won){store.wins++;store.streak++;store.bestStreak=Math.max(store.bestStreak,store.streak);}else store.streak=0;const old=store.studied[key]||{plays:0,wins:0,quizSolved:false};store.studied[key]={...old,plays:(old.plays||0)+1,wins:(old.wins||0)+(won?1:0),won:(old.won||false)||won,last:new Date().toISOString()};store.recent.push(key);store.recent=store.recent.slice(-28);if(session.kind==='daily'){store.daily[session.day]={word:key,won,attempts:round.guesses.length};store.dailyProgress=null;}session.results.push(won);persist();if(won)confetti();animateToDiscovery(note);}
-function confetti(){const host=$('confetti');host.innerHTML='';if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const shades=['#6cb1ff','#d8b85b','#9cc3ff','#c9d9fa'];for(let i=0;i<26;i++){const d=document.createElement('i');d.className='confetti-dot';d.style.left=`${45+Math.random()*10}%`;d.style.top='29%';d.style.background=shades[i%shades.length];d.style.setProperty('--x',`${(Math.random()-.5)*520}px`);d.style.setProperty('--y',`${(Math.random()-.5)*420+180}px`);d.style.setProperty('--r',`${(Math.random()-.5)*880}deg`);d.style.animationDelay=`${Math.random()*170}ms`;host.appendChild(d);}setTimeout(()=>host.textContent='',1350);}
+function endRound(won,note=''){if(!round||round.recorded)return;round.recorded=true;round.done=true;round.won=won;clearInterval(timer);timer=null;round.stars=starRating();const key=normalize(round.item.word);store.played++;if(won){store.wins++;store.streak++;store.bestStreak=Math.max(store.bestStreak,store.streak);}else store.streak=0;const old=store.studied[key]||{plays:0,wins:0,quizSolved:false};store.studied[key]={...old,plays:(old.plays||0)+1,wins:(old.wins||0)+(won?1:0),won:(old.won||false)||won,last:new Date().toISOString()};store.recent.push(key);store.recent=store.recent.slice(-28);if(session.kind==='daily'){store.daily[session.day]={word:key,won,attempts:round.guesses.length};store.dailyProgress=null;}session.results.push(won);persist();if(won)confetti(round.guesses.length===1?'perfect':round.guesses.length===round.max?'clutch':'regular');animateToDiscovery(note);}
+function confetti(type='regular'){
+  const host=$('confetti');host.innerHTML='';
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const themes={
+    perfect:{count:48,shades:['#9dc7ff','#f2d277','#d8b85b','#f0f4ff'],spread:640},
+    clutch:{count:33,shades:['#b1a0ff','#6cb1ff','#d8b85b','#f1ebff'],spread:520},
+    regular:{count:25,shades:['#6cb1ff','#d8b85b','#9cc3ff','#c9d9fa'],spread:450}
+  };
+  const theme=themes[type]||themes.regular;
+  for(let i=0;i<theme.count;i++){
+    const d=document.createElement('i');d.className='confetti-dot';
+    d.style.left=`${44+Math.random()*12}%`;d.style.top='29%';
+    d.style.background=theme.shades[i%theme.shades.length];
+    d.style.setProperty('--x',`${(Math.random()-.5)*theme.spread}px`);
+    d.style.setProperty('--y',`${(Math.random()-.5)*430+180}px`);
+    d.style.setProperty('--r',`${(Math.random()-.5)*850}deg`);
+    d.style.animationDelay=`${Math.random()*180}ms`;
+    host.appendChild(d);
+  }
+  setTimeout(()=>host.textContent='',1450);
+}
 
 function animateToDiscovery(note=''){
   const trans=$('roundTransition');const activeRound=round;
   if(!trans||window.matchMedia('(prefers-reduced-motion: reduce)').matches){showDiscovery(note);return;}
-  $('transitionLabel').textContent=round.won?'Você descobriu':'Uma nova descoberta';
+  $('transitionLabel').textContent=round.won?(round.guesses.length===1?'Acerto de primeira!':round.guesses.length===round.max?'Vitória na última chance!':'Você descobriu'):'Uma nova descoberta';
   $('transitionWord').textContent=displayWord(round.item.word);
   $('transitionSubline').textContent=round.won?'Conheça a ideia por trás da palavra':'Veja o que essa palavra ensina';
   trans.hidden=false;
@@ -806,7 +946,7 @@ function animateToDiscovery(note=''){
     setTimeout(()=>{trans.classList.remove('revealed');setTimeout(()=>{trans.hidden=true},250);},210);
   },900);
 }
-function showDiscovery(note=''){const c=round.item;lessonTab='history';$('discoveryStatus').textContent=reviewOnly?'Sua coleção':round.won?'✦ Conceito descoberto':'Uma nova ideia para explorar';$('discoveryWord').textContent=displayWord(c.word);$('discoveryStars').textContent=reviewOnly?'':round.won?'★'.repeat(round.stars)+'☆'.repeat(3-round.stars):'◇ ◇ ◇';$('discoveryIntro').textContent=reviewOnly?`Relembre este conceito de ${c.topic}.`:round.won?`Você encontrou a resposta em ${round.guesses.length} tentativa${round.guesses.length!==1?'s':''}${round.hintsUsed?` e recebeu ${round.hintsUsed} pista${round.hintsUsed>1?'s':''}`:''}.`:(note?`${note} A resposta era ${displayWord(c.word)}.`:`A palavra era ${displayWord(c.word)}. Descubra o que ela ensina.`);$('discoveryMeaning').textContent=c.meaning;document.querySelectorAll('[data-lesson]').forEach(b=>b.classList.toggle('active',b.dataset.lesson==='history'));renderLesson();$('discoveryContinue').textContent=reviewOnly?'Voltar à coleção':session?.kind==='journey'&&session.index<session.items.length-1?`Próxima descoberta (${session.index+2}/${session.items.length}) ›`:session?.kind==='journey'?'Concluir trilha ›':session?.kind==='free'?'Jogar outra palavra ›':'Voltar a jogar';$('discoveryCollection').hidden=reviewOnly;show('discovery',reviewOnly?'collection':session?.kind==='free'?'home':'challenges');}
+function showDiscovery(note=''){const c=round.item;lessonTab='history';$('discoveryStatus').textContent=reviewOnly?'Sua coleção':round.won?(round.guesses.length===1?'Acerto de primeira!':round.guesses.length===round.max?'Vitória na última tentativa!':'Conceito descoberto'):'Uma nova ideia para explorar';$('discoveryWord').textContent=displayWord(c.word);$('discoveryStars').textContent=reviewOnly?'':round.won?'★'.repeat(round.stars)+'☆'.repeat(3-round.stars):'◇ ◇ ◇';$('discoveryIntro').textContent=reviewOnly?`Relembre este conceito de ${c.topic}.`:round.won?`Você encontrou a resposta em ${round.guesses.length} tentativa${round.guesses.length!==1?'s':''}${round.hintsUsed?` e recebeu ${round.hintsUsed} pista${round.hintsUsed>1?'s':''}`:''}.`:(note?`${note} A resposta era ${displayWord(c.word)}.`:`A palavra era ${displayWord(c.word)}. Descubra o que ela ensina.`);$('discoveryMeaning').textContent=c.meaning;document.querySelectorAll('[data-lesson]').forEach(b=>b.classList.toggle('active',b.dataset.lesson==='history'));renderLesson();$('discoveryContinue').textContent=reviewOnly?'Voltar à coleção':session?.kind==='journey'&&session.index<session.items.length-1?`Próxima descoberta (${session.index+2}/${session.items.length}) ›`:session?.kind==='journey'?'Concluir trilha ›':session?.kind==='free'?'Jogar outra palavra ›':'Voltar a jogar';$('discoveryCollection').hidden=reviewOnly;show('discovery',reviewOnly?'collection':session?.kind==='free'?'home':'challenges');}
 // Troca os textos das abas com transição de opacidade e altura, evitando saltos na página.
 let lessonChangeId=0;
 function renderLesson(animate=false){
