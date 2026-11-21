@@ -55,7 +55,7 @@
 <section id="challenges" class="view"><div class="section-heading"><div class="eyebrow">Variações do jogo</div><h2>Desafios</h2><p>O mesmo Wordle, com objetivos simples para variar a experiência.</p></div><div class="card-list"><button class="feature" id="dailyChallenge"><span class="feature-icon">◷</span><span><strong>Desafio do dia</strong><small>Uma partida diária. Se sair, continue de onde parou.</small></span><span class="arrow">›</span></button><button class="feature" id="journeyChallenge"><span class="feature-icon">◇</span><span><strong>Trilha de descobertas</strong><small>Três palavras, três ideias e uma descoberta após a outra.</small></span><span class="arrow">›</span></button><button class="feature" id="noHintsChallenge"><span class="feature-icon">✦</span><span><strong>Sem pistas</strong><small>Teste a dedução usando só as letras do tabuleiro.</small></span><span class="arrow">›</span></button></div><p class="challenge-note" id="dailyNote"></p></section>
 <section id="collection" class="view"><div class="section-heading"><div class="eyebrow">Seus conceitos</div><h2>Coleção</h2><p>As palavras descobertas ficam salvas aqui para você revisar depois.</p></div><div class="panel" style="margin-bottom:13px"><div id="collectionSummary" class="subtle"></div><div class="meter" aria-hidden="true"><span id="collectionBar" style="width:0%"></span></div></div><div class="collection-controls"><input id="collectionSearch" class="field" placeholder="Buscar palavra..." aria-label="Buscar na coleção"><select id="collectionFilter" class="field" aria-label="Filtrar coleção"><option value="all">Todas</option><option value="favorite">Favoritas</option><option value="won">Descobertas</option></select></div><div id="collectionList" class="collection-list"></div></section>
 </main></div>
-<dialog id="helpDialog"><h2>Como jogar</h2><p>Descubra a palavra escondida usando o tabuleiro. Digite uma tentativa com a quantidade de letras indicada e pressione <strong>Enter</strong>.</p><h3>Cores das letras</h3><p><strong style="color:#7bb6ff">Azul:</strong> letra na posição certa. <strong style="color:#ddc46c">Amarelo:</strong> letra presente, mas em outra posição. <strong>Cinza:</strong> letra ausente, considerando repetições.</p><h3>Aprenda enquanto joga</h3><p>Nos jogos comuns, <strong>uma pista surge automaticamente após cada uma das três primeiras tentativas incorretas</strong>. A primeira apresenta o problema; a segunda orienta o raciocínio; a terceira traz contexto ou uma referência mais específica. O desafio “Sem pistas” não mostra pistas. Quando a partida termina, a descoberta mostra significado, origem ou contexto histórico, exemplo e uma explicação complementar. Não há questionário obrigatório.</p><h3>Dificuldade e desafios</h3><p>A dificuldade considera o conhecimento exigido, <strong>não o número de letras</strong>. Uma palavra de quatro letras também pode ser extrema. Em Desafios, há a palavra do dia, uma trilha e a opção sem pistas. A Coleção guarda o que você descobriu neste navegador.</p><h3>Sobre as tentativas</h3><p>É possível digitar sem acentos, inclusive para respostas acentuadas. Para não rejeitar palavras válidas em modo offline, esta primeira versão aceita sequências de letras do comprimento correto, sem exigir consulta a um dicionário.</p><button id="helpClose" class="btn primary wide">Entendi</button></dialog>
+<dialog id="helpDialog"><h2>Como jogar</h2><p>Descubra a palavra escondida usando o tabuleiro. Digite uma tentativa com a quantidade de letras indicada e pressione <strong>Enter</strong>.</p><h3>Cores das letras</h3><p><strong style="color:#7bb6ff">Azul:</strong> letra na posição certa. <strong style="color:#ddc46c">Amarelo:</strong> letra presente, mas em outra posição. <strong>Cinza:</strong> letra ausente, considerando repetições.</p><h3>Aprenda enquanto joga</h3><p>Nos jogos comuns, <strong>uma pista surge automaticamente após cada uma das três primeiras tentativas incorretas</strong>. A primeira apresenta o problema; a segunda orienta o raciocínio; a terceira traz contexto ou uma referência mais específica. O desafio “Sem pistas” não mostra pistas. Quando a partida termina, a descoberta mostra significado, origem ou contexto histórico, exemplo e uma explicação complementar. Não há questionário obrigatório.</p><h3>Dificuldade e desafios</h3><p>A dificuldade considera o conhecimento exigido, <strong>não o número de letras</strong>. Uma palavra de quatro letras também pode ser extrema. Em Desafios, há a palavra do dia, uma trilha e a opção sem pistas. A Coleção guarda o que você descobriu neste navegador.</p><h3>Sobre as tentativas</h3><p>É possível digitar sem acentos, inclusive para respostas acentuadas. As tentativas são verificadas por uma lista ampla de palavras do português brasileiro. A validação não consome tentativa quando a palavra não é reconhecida. Na primeira visita, é necessário carregar o dicionário pela internet; depois, o navegador pode reutilizar a cópia armazenada.</p><button id="helpClose" class="btn primary wide">Entendi</button></dialog>
 <div id="roundTransition" class="round-transition" hidden aria-live="polite"><div class="transition-message"><span id="transitionLabel"></span><strong id="transitionWord"></strong><small id="transitionSubline"></small></div></div>
 <div id="toast" role="status" aria-live="polite"></div><div id="confetti" aria-hidden="true"></div>
 <script>
@@ -672,6 +672,77 @@ const $=(id)=>document.getElementById(id);
 const normalize=(s)=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z]/g,'');
 const displayWord=(w)=>{const t=String(w||'').toLocaleLowerCase('pt-BR'); return t ? t.charAt(0).toLocaleUpperCase('pt-BR')+t.slice(1) : '';};
 const WORD_BY_KEY=new Map(CONCEPTS.map(c=>[normalize(c.word),c]));
+
+/* Validacao das tentativas: lista ampla de portugues brasileiro (VERO/LibreOffice).
+   O banco de respostas do Filosofle e separado do vocabulario permitido. */
+const DICTIONARY_URLS=[
+  'https://cdn.jsdelivr.net/gh/pythonprobr/palavras@master/palavras.txt',
+  'https://raw.githubusercontent.com/pythonprobr/palavras/master/palavras.txt'
+];
+const DICTIONARY_CACHE='filosofle-ptbr-palavras-v1';
+const DICTIONARY_CACHE_KEY=DICTIONARY_URLS[1];
+const VALID_GUESSES=new Set(CONCEPTS.map(c=>normalize(c.word)));
+let dictionaryState='loading',dictionaryPromise=null;
+function dictionaryMessage(message){if(round&&!round.done&&$('game')?.classList.contains('active'))$('gameMessage').textContent=message;}
+async function downloadPortugueseWords(){
+  if('caches' in window){
+    try{const cache=await caches.open(DICTIONARY_CACHE),entry=await cache.match(DICTIONARY_CACHE_KEY);
+      if(entry){const text=await entry.text();if(text.length>500000)return text;}
+    }catch(e){/* A ausencia de cache nao impede o carregamento. */}
+  }
+  for(const url of DICTIONARY_URLS){
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),18000);
+    try{
+      const response=await fetch(url,{mode:'cors',signal:controller.signal,cache:'force-cache'});
+      if(!response.ok)continue;
+      const text=await response.text();
+      if(text.length<500000)continue;
+      if('caches' in window)try{
+        const cache=await caches.open(DICTIONARY_CACHE);
+        await cache.put(DICTIONARY_CACHE_KEY,new Response(text,{headers:{'Content-Type':'text/plain; charset=utf-8'}}));
+      }catch(e){/* cache indisponivel; a lista continua carregada na memoria */}
+      return text;
+    }catch(e){/* tenta outra origem */}
+    finally{clearTimeout(timeout);}
+  }
+  throw new Error('Nao foi possivel consultar a base lexical.');
+}
+function loadPortugueseDictionary(){
+  if(dictionaryState==='ready')return Promise.resolve(true);
+  if(dictionaryPromise)return dictionaryPromise;
+  dictionaryState='loading';
+  dictionaryPromise=(async()=>{
+    try{
+      const text=await downloadPortugueseWords(),additions=new Set();
+      for(const raw of text.split(/\r?\n/)){
+        const word=raw.trim();
+        // Mantem apenas palavras simples: sem numeros, tracos ou espacos.
+        if(!word||!(/^[\p{L}]+$/u.test(word)))continue;
+        const normalized=normalize(word);
+        if(normalized.length>=1&&normalized.length<=10)additions.add(normalized);
+      }
+      if(additions.size<25000)throw new Error('Lista incompleta.');
+      additions.forEach(w=>VALID_GUESSES.add(w));
+      dictionaryState='ready';
+      dictionaryMessage('Dicionario pronto. Continue tentando descobrir a palavra.');
+      return true;
+    }catch(error){
+      dictionaryState='failed';
+      dictionaryMessage('Nao foi possivel consultar o dicionario. Verifique sua conexao.');
+      return false;
+    }finally{dictionaryPromise=null;}
+  })();
+  return dictionaryPromise;
+}
+function guessIsValid(word){return VALID_GUESSES.has(normalize(word));}
+function checkGuessDictionary(guess){
+  if(guessIsValid(guess))return true;
+  if(dictionaryState==='loading'){toast('Preparando o dicionario. Tente novamente em instantes.');return false;}
+  if(dictionaryState==='failed'){toast('Dicionario indisponivel. Conecte-se a internet para validar esta palavra.');loadPortugueseDictionary();return false;}
+  toast('Palavra nao encontrada no dicionario de portugues. Tente outra.');
+  return false;
+}
+
 const TOPICS=[...new Set(CONCEPTS.map(c=>c.topic))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
 const STORE_KEY='filosofle-wordle-v1';
 const defaults=()=>({played:0,wins:0,streak:0,bestStreak:0,studied:{},recent:[],favorites:[],daily:{},quizCorrect:0});
@@ -714,7 +785,7 @@ const ROWS=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
 function renderKeyboard(){const panel=$('keyboard');panel.textContent='';const priority={absent:1,present:2,exact:3},statuses={};for(let i=0;i<round.guesses.length;i++){for(let j=0;j<round.guesses[i].length;j++){const k=round.guesses[i][j],s=round.evaluations[i][j];if(!statuses[k]||priority[s]>priority[statuses[k]])statuses[k]=s;}}const addKey=(text,label)=>{const btn=document.createElement('button');btn.type='button';btn.className='key'+(text==='ENTER'||text==='BACK'?' big':'')+(statuses[text]?' '+statuses[text]:'');btn.textContent=label||text;btn.setAttribute('aria-label',text==='BACK'?'Apagar':text==='ENTER'?'Confirmar tentativa':'Letra '+text);btn.addEventListener('click',()=>handleKey(text));return btn;};ROWS.forEach((line,i)=>{const row=document.createElement('div');row.className='key-row';if(i===2)row.appendChild(addKey('ENTER','ENTER'));for(const key of line)row.appendChild(addKey(key));if(i===2)row.appendChild(addKey('BACK','⌫'));panel.appendChild(row);});}
 function handleKey(raw){if(!round||round.done||!document.getElementById('game').classList.contains('active'))return;const key=normalize(raw);if(raw==='BACK'||raw==='Backspace'){round.typed=round.typed.slice(0,-1);renderBoard();saveDailyProgress();return;}if(raw==='ENTER'||raw==='Enter'){submitGuess();return;}if(key.length===1&&/^[A-Z]$/.test(key)&&round.typed.length<lengthOf(round.item)){round.typed+=key;renderBoard();saveDailyProgress();}}
 function evaluateGuess(guess,target){const g=[...normalize(guess)],t=[...normalize(target)];const scores=Array(g.length).fill('absent'),available={};for(let i=0;i<t.length;i++){if(g[i]===t[i])scores[i]='exact';else available[t[i]]=(available[t[i]]||0)+1;}for(let i=0;i<g.length;i++){if(scores[i]==='exact')continue;if((available[g[i]]||0)>0){scores[i]='present';available[g[i]]--;}}return scores;}
-function submitGuess(){if(round.typed.length!==lengthOf(round.item)){toast(`A palavra precisa ter ${lengthOf(round.item)} letras.`);return;}const guess=round.typed,scores=evaluateGuess(guess,round.item.word);round.guesses.push(guess);round.evaluations.push(scores);round.typed='';renderBoard(round.guesses.length-1);renderKeyboard();updateAttemptInfo();saveDailyProgress();if(normalize(guess)===normalize(round.item.word)){round.done=true;round.won=true;lockDailyResult(true);$('gameMessage').textContent='Palavra descoberta!';setTimeout(()=>endRound(true),Math.max(360,lengthOf(round.item)*45+250));}else if(round.guesses.length>=round.max){round.done=true;lockDailyResult(false);$('gameMessage').textContent='Tentativas encerradas.';setTimeout(()=>endRound(false),Math.max(360,lengthOf(round.item)*45+250));}else{revealHint();$('gameMessage').textContent=round.guesses.length<=3&&session.kind!=='nohint'?'Uma pista nova apareceu abaixo do teclado.':'Use as cores das letras para tentar novamente.';}}
+function submitGuess(){if(round.typed.length!==lengthOf(round.item)){toast(`A palavra precisa ter ${lengthOf(round.item)} letras.`);return;}const guess=round.typed;if(!checkGuessDictionary(guess))return;const scores=evaluateGuess(guess,round.item.word);round.guesses.push(guess);round.evaluations.push(scores);round.typed='';renderBoard(round.guesses.length-1);renderKeyboard();updateAttemptInfo();saveDailyProgress();if(normalize(guess)===normalize(round.item.word)){round.done=true;round.won=true;lockDailyResult(true);$('gameMessage').textContent='Palavra descoberta!';setTimeout(()=>endRound(true),Math.max(360,lengthOf(round.item)*45+250));}else if(round.guesses.length>=round.max){round.done=true;lockDailyResult(false);$('gameMessage').textContent='Tentativas encerradas.';setTimeout(()=>endRound(false),Math.max(360,lengthOf(round.item)*45+250));}else{revealHint();$('gameMessage').textContent=round.guesses.length<=3&&session.kind!=='nohint'?'Uma pista nova apareceu abaixo do teclado.':'Use as cores das letras para tentar novamente.';}}
 function updateHintControls(){if(!round)return;$('hintCount').textContent=`${round.hintsUsed} de ${round.item.hints.length}`;}
 function revealHint(){if(!round||round.done||session.kind==='nohint'||round.hintsUsed>=round.item.hints.length)return;round.hintsUsed++;const li=document.createElement('li');li.textContent=round.item.hints[round.hintsUsed-1];li.setAttribute('aria-label',`Pista ${round.hintsUsed}: ${li.textContent}`);$('hintList').appendChild(li);$('hintEmpty').hidden=true;updateHintControls();saveDailyProgress();}
 function starRating(){if(!round.won)return 0;const n=round.guesses.length;return n<=2?3:n<=4?2:1;}
@@ -799,6 +870,6 @@ function openReview(key){const c=WORD_BY_KEY.get(key);if(!c)return;clearInterval
 function renderCollection(){const items=Object.keys(store.studied).map(k=>WORD_BY_KEY.get(k)).filter(Boolean);const wins=items.filter(c=>store.studied[normalize(c.word)]?.won).length;$('collectionSummary').textContent=`${items.length} conceitos estudados · ${wins} descobertos · ${CONCEPTS.length} disponíveis`;$('collectionBar').style.width=`${Math.round(items.length/CONCEPTS.length*100)}%`;const term=normalize($('collectionSearch').value),filter=$('collectionFilter').value;const visible=items.filter(c=>{const key=normalize(c.word);return (!term||normalize(c.word).includes(term)||normalize(c.topic).includes(term))&&(filter==='all'||(filter==='favorite'&&store.favorites.includes(key))||(filter==='won'&&store.studied[key].won));}).sort((a,b)=>(store.studied[normalize(b.word)]?.last||'').localeCompare(store.studied[normalize(a.word)]?.last||''));const host=$('collectionList');host.textContent='';if(!visible.length){host.innerHTML=`<div class="empty-state">${items.length?'Nenhum conceito corresponde a este filtro.':'Sua coleção está vazia. Descubra sua primeira palavra para começar.'}</div>`;return;}for(const c of visible){const key=normalize(c.word),entry=store.studied[key],favorite=store.favorites.includes(key),card=document.createElement('div');card.className='collect-card';const icon=document.createElement('span');icon.className='collect-icon';icon.textContent=c.word[0];const info=document.createElement('div');info.className='collect-info';const title=document.createElement('strong');title.textContent=displayWord(c.word);const sub=document.createElement('small');sub.textContent=`${c.topic} · ${entry.won?'Descoberto':'Estudado'}`;info.append(title,sub);const actions=document.createElement('div');actions.className='collect-actions';const fav=document.createElement('button');fav.className='small-btn'+(favorite?' fav':'');fav.setAttribute('aria-label',favorite?'Remover dos favoritos':'Adicionar aos favoritos');fav.textContent=favorite?'★':'☆';fav.addEventListener('click',()=>{store.favorites=favorite?store.favorites.filter(x=>x!==key):[...store.favorites,key];persist();renderCollection();});const open=document.createElement('button');open.className='small-btn';open.textContent='Rever';open.addEventListener('click',()=>openReview(key));actions.append(fav,open);card.append(icon,info,actions);host.appendChild(card);}}
 function bind(){document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click',()=>{const tab=button.dataset.tab;if(!confirmExit())return;clearInterval(timer);round=null;session=null;reviewOnly=false;show(tab);}));$('homeButton').addEventListener('click',()=>exitCurrent('home'));$('helpButton').addEventListener('click',()=>{$('helpDialog').showModal();});$('helpClose').addEventListener('click',()=>{$('helpDialog').close();});$('freeStart').addEventListener('click',openSetup);$('dailyFromHome').addEventListener('click',beginDaily);const nh=$('noHintsFromHome'); if(nh) nh.addEventListener('click',beginNoHints);$('setupBack').addEventListener('click',()=>show('home'));document.querySelectorAll('[data-level]').forEach(button=>button.addEventListener('click',()=>{selectedLevel=+button.dataset.level;document.querySelectorAll('[data-level]').forEach(b=>b.classList.toggle('active',b===button));updatePoolInfo();}));$('topicSelect').addEventListener('change',()=>{selectedTopic=$('topicSelect').value;updatePoolInfo();});$('startGame').addEventListener('click',beginFree);$('dailyChallenge').addEventListener('click',beginDaily);$('journeyChallenge').addEventListener('click',beginJourney);$('noHintsChallenge').addEventListener('click',beginNoHints);$('exitGame').addEventListener('click',()=>exitCurrent('home'));document.addEventListener('keydown',e=>{if($('helpDialog').open||!document.getElementById('game').classList.contains('active'))return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='Enter'||e.key==='Backspace'||/^[a-zA-ZÀ-ÿ]$/.test(e.key)){e.preventDefault();handleKey(e.key);}});document.querySelectorAll('[data-lesson]').forEach(button=>button.addEventListener('click',()=>{if(lessonTab===button.dataset.lesson)return;lessonTab=button.dataset.lesson;document.querySelectorAll('[data-lesson]').forEach(b=>b.classList.toggle('active',b===button));renderLesson(true);}));$('discoveryContinue').addEventListener('click',continueAfterDiscovery);$('discoveryCollection').addEventListener('click',()=>{round=null;session=null;reviewOnly=false;show('collection');});$('collectionSearch').addEventListener('input',renderCollection);$('collectionFilter').addEventListener('change',renderCollection);}
 window.addEventListener('storage',e=>{if(e.key!==STORE_KEY)return;const other=loadStore();store.daily={...store.daily,...other.daily};if(other.daily[localDayKey()]&&session?.kind==='daily'&&!round?.done){round=null;session=null;show('challenges');toast('O desafio diário já foi concluído em outra aba.');}updateDailyButtons();});
-setupTopics();bind();updateHome();updateChallengeNote();
+setupTopics();bind();updateHome();updateChallengeNote();loadPortugueseDictionary();window.addEventListener('online',()=>{if(dictionaryState==='failed')loadPortugueseDictionary();});
 
 </script></body></html>
