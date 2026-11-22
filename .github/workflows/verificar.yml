@@ -37,5 +37,27 @@ jobs:
           for(const topic of topics)for(let n=1;n<=4;n++)assert(words.some(x=>x.topic===topic&&x.level===n),'Nível sem palavra em '+topic+': '+n);
           assert(scripts[1].includes('loadAdditionalDictionary'),'Falta o dicionário de flexões.');
           for(const w of ['AÇÕES','PENSANDO','FALARAM','VIRTUDES']){ if(w==='FALARAM')continue;assert(html.includes(w),'Forma ausente: '+w); }
-          console.log('OK: '+words.length+' respostas em '+topics.length+' temas, sem duplicações, scripts válidos e dicionário ampliado.');
+          assert(!scripts[1].includes('selectTile('),'Seleção de quadrados ainda ativa.');
+          assert(!scripts[1].includes("tile.addEventListener('click'"),'Quadrados ainda clicáveis.');
+          assert(!html.includes('Toque em qualquer quadrado da tentativa atual'),'Ajuda antiga de seleção ainda presente.');
+          const context=vm.createContext({round:{typed:'     ',item:{word:'TESTE'}},lengthOf:()=>5,renderBoard:()=>{},saveDailyProgress:()=>{}});
+          const start=scripts[1].indexOf('function appendLetter('),end=scripts[1].indexOf('function revealTiles(',start);
+          assert(start>=0&&end>start,'As funções de digitação sequencial não foram encontradas.');
+          vm.runInContext(scripts[1].slice(start,end),context);
+          for(const ch of 'ABCDE')context.appendLetter(ch);
+          assert.equal(context.round.typed,'ABCDE','A escrita não seguiu da esquerda para a direita.');
+          context.appendLetter('X');
+          assert.equal(context.round.typed,'ABCDE','A escrita ultrapassou o último quadrado.');
+          context.eraseLastLetter();
+          assert.equal(context.round.typed,'ABCD ','O Backspace não apagou a última letra.');
+          context.appendLetter('F');
+          assert.equal(context.round.typed,'ABCDF','A escrita não retomou a última posição.');
+          const dictCtx=vm.createContext({normalize:s=>String(s).normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/[^A-Z]/g,'')});
+          vm.runInContext(scripts[0],dictCtx);
+          const ds=scripts[1].indexOf('const COMMON_INFLECTIONS='),de=scripts[1].indexOf("let dictionaryState=",ds),gs=scripts[1].indexOf('function guessIsValid('),ge=scripts[1].indexOf('function checkGuessDictionary(',gs);
+          assert(ds>=0&&de>ds&&gs>=0&&ge>gs,'Validador de palavras ausente.');
+          vm.runInContext(scripts[1].slice(ds,de)+scripts[1].slice(gs,ge)+';globalThis.checkWord=guessIsValid;',dictCtx);
+          for(const w of ['PARADIGMA','PARADIGMAS','VIRTUDES','HIPOTESES','NARRATIVAS','PENSANDO','AÇÕES'])assert(dictCtx.checkWord(w),'Forma legítima recusada: '+w);
+          for(const w of ['XPTOZZ','PARADIGMZZ','PQZXWR'])assert(!dictCtx.checkWord(w),'Palavra inventada aceita: '+w);
+          console.log('OK: entrada sequencial, Backspace e plurais testados, além de '+words.length+' conceitos.');
           NODE
