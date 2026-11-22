@@ -77,6 +77,9 @@ jobs:
           const ds=scripts[1].indexOf('const COMMON_INFLECTIONS='),de=scripts[1].indexOf("let dictionaryState=",ds),gs=scripts[1].indexOf('function guessIsValid('),ge=scripts[1].indexOf('function checkGuessDictionary(',gs);
           assert(ds>=0&&de>ds&&gs>=0&&ge>gs,'Validador de palavras ausente.');
           vm.runInContext(scripts[1].slice(ds,de)+scripts[1].slice(gs,ge)+';globalThis.checkWord=guessIsValid;',dictCtx);
+          // Paradigma é aceito depois de ser carregado dos dicionários, sem voltar a ser resposta do jogo.
+          assert(!dictCtx.checkWord('PARADIGMA'),'Paradigma não deve ser resposta pré-carregada.');
+          vm.runInContext("VALID_GUESSES.add('PARADIGMA');",dictCtx);
           for(const w of ['PARADIGMA','PARADIGMAS','VIRTUDES','HIPOTESES','NARRATIVAS','PENSANDO','AÇÕES'])assert(dictCtx.checkWord(w),'Forma legítima recusada: '+w);
           for(const w of ['XPTOZZ','PARADIGMZZ','PQZXWR']){
             console.log('VERIFICAÇÃO NEGATIVA',w,'normalização',dictCtx.normalizer(w),'aceita',dictCtx.checkWord(w));
