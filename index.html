@@ -816,12 +816,23 @@ function loadPortugueseDictionary(){
   }).finally(()=>{dictionaryPromise=null;});
   return dictionaryPromise;
 }
+/* Flexões plurais regulares, aceitas apenas quando o singular está no dicionário.
+   Conjugações e plurais irregulares são conferidos também nas fontes lexicais. */
 function guessIsValid(word){
   const key=normalize(word);
+  if(key.length<1||key.length>10)return false;
   if(VALID_GUESSES.has(key))return true;
-  if(key.length>=4&&key.length<=10&&key.endsWith('S')){
-    const base=key.slice(0,-1);
-    if(/[AOE]$/.test(base)&&VALID_GUESSES.has(base))return true;
+  if(key.length<4||!key.endsWith('S'))return false;
+  const base=key.slice(0,-1);
+  // Paradigma -> paradigmas; teoria -> teorias; lei -> leis.
+  if(/[AEIOU]$/.test(base)&&VALID_GUESSES.has(base))return true;
+  // Homem -> homens; comum -> comuns.
+  if(key.endsWith('NS')&&VALID_GUESSES.has(key.slice(0,-2)+'M'))return true;
+  // Flor -> flores; luz -> luzes.
+  if(key.endsWith('ES')&&/[RZ]$/.test(key.slice(0,-2))&&VALID_GUESSES.has(key.slice(0,-2)))return true;
+  // Animal -> animais; papel -> papéis; farol -> faróis; azul -> azuis.
+  for(const [plural,singular] of [['AIS','AL'],['EIS','EL'],['OIS','OL'],['UIS','UL']]){
+    if(key.endsWith(plural)&&VALID_GUESSES.has(key.slice(0,-plural.length)+singular))return true;
   }
   return false;
 }
