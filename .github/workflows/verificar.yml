@@ -1,0 +1,41 @@
+name: Verificar Filosofle
+on:
+  push:
+    paths:
+      - index.html
+      - PALAVRAS.md
+      - .github/workflows/verificar.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Conferir scripts e banco
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),vm=require('vm'),assert=require('assert');
+          const html=fs.readFileSync('index.html','utf8');
+          const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
+          assert(scripts.length>=2,'É necessário encontrar os scripts do jogo.');
+          for(const script of scripts)new vm.Script(script);
+          const ctx={};
+          vm.runInNewContext(scripts[0]+';globalThis.RESULT=CONCEPTS.map(c=>({word:c.word,topic:c.topic,level:c.level}));',ctx);
+          const words=ctx.RESULT;
+          assert.equal(words.length,177,'Quantidade de palavras revisadas diferente do esperado.');
+          const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+          const set=new Set(words.map(x=>norm(x.word)));
+          assert.equal(set.size,words.length,'Existem palavras duplicadas.');
+          for(const removed of ['ÁGUA','TEATRO','RESÍDUO','ROBÔ','MÚSICA','CINEMA','AMOSTRA','DADOS'])assert(!set.has(norm(removed)), 'Resposta inadequada: '+removed);
+          for(const w of words)assert(norm(w.word).length>=1&&norm(w.word).length<=10,'Palavra com tamanho inválido: '+w.word);
+          const topics=[...new Set(words.map(w=>w.topic))];
+          for(const topic of topics)for(let n=1;n<=4;n++)assert(words.some(x=>x.topic===topic&&x.level===n),'Nível sem palavra em '+topic+': '+n);
+          assert(scripts[1].includes('loadAdditionalDictionary'),'Falta o dicionário de flexões.');
+          for(const w of ['AÇÕES','PENSANDO','FALARAM','VIRTUDES']){ if(w==='FALARAM')continue;assert(html.includes(w),'Forma ausente: '+w); }
+          console.log('OK: '+words.length+' respostas em '+topics.length+' temas, sem duplicações, scripts válidos e dicionário ampliado.');
+          NODE
