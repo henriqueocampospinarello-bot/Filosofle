@@ -1,6 +1,6 @@
 # Todas as palavras do Filosofle
 
-A versão atual possui **177 respostas possíveis**, organizadas em **12 áreas**. São conceitos, categorias e problemas filosóficos, incluindo filosofia da ciência, da linguagem, da religião e tradições filosóficas.
+A versão atual possui **138 respostas possíveis**, organizadas em **8 áreas**. São conceitos, categorias e problemas filosóficos, incluindo ética, teoria do conhecimento, filosofia da ciência, lógica, filosofia política, metafísica, tradições filosóficas e filosofia da religião.
 
 **Importante:** esta relação é o banco de respostas, não o dicionário de tentativas. Você pode testar palavras comuns, plurais e verbos conjugados válidos em português, mas essas palavras não se tornam respostas por isso.
 
@@ -28,22 +28,6 @@ Lei · Poder · Estado · Democracia · Cidadania · Liberdade · Soberania · R
 
 Ser · Causa · Tempo · Essência · Ontologia · Ente · Substância · Acidente · Monismo · Dualismo · Matéria · Infinito · Finito · Cosmos · Forma · Nada · Realismo · Possível
 
-## Estética (9)
-
-Arte · Belo · Beleza · Sublime · Catarse · Harmonia · Mímesis · Gosto · Tragédia
-
-## Linguagem (14)
-
-Signo · Sentido · Símbolo · Linguagem · Contexto · Metáfora · Sintaxe · Semântica · Pragmática · Referência · Discurso · Narrativa · Retórica · Enunciado
-
-## Existência (12)
-
-Vida · Morte · Escolha · Angústia · Identidade · Mente · Corpo · Absurdo · Finitude · Emoção · Pessoa · Afeto
-
-## Tecnologia (4)
-
-Viés · Vigilância · Técnica · Agência
-
 ## Tradições (20)
 
 Dao · Yin · Ren · Ahimsa · Ataraxia · Qi · Li · Yi · Yang · Atman · Brahman · Dharma · Karma · Nirvana · Ubuntu · Wuwei · Yoga · Dukkha · Anatman · Moksha
@@ -54,7 +38,7 @@ Fé · Sagrado · Teísmo · Ateísmo · Teodiceia · Milagre · Alma · Místic
 
 ## Critério de seleção
 
-Excluímos nomes de materiais, ambientes, atividades artísticas ou termos meramente técnicos que não eram conceitos filosóficos por si só. Palavras cotidianas como Ser, Tempo, Liberdade e Vida permanecem porque são problemas clássicos da filosofia.
+Retiramos integralmente as áreas de Estética, Filosofia da Linguagem, Existência e Filosofia da Tecnologia, conforme a seleção do projeto. Mantivemos as oito áreas restantes. Palavras cotidianas como Ser, Tempo, Liberdade permanecem porque são problemas clássicos da filosofia.
 
 ## Fontes dos dicionários de tentativas
 
