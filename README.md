@@ -1,6 +1,6 @@
 # Filosofle
 
-Jogo de palavras inspirado no Wordle, com 177 conceitos filosóficos, pistas progressivas após erros e explicações de significado, origem, exemplos e aprofundamento.
+Jogo de palavras inspirado no Wordle, com 138 conceitos selecionados de oito áreas da Filosofia, pistas progressivas após erros e explicações de significado, origem, exemplos e aprofundamento.
 
 Veja a lista completa de respostas em [PALAVRAS.md](PALAVRAS.md). O banco de respostas é separado do dicionário geral de tentativas.
 
