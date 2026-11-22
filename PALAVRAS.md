@@ -1,47 +1,49 @@
 # Todas as palavras do Filosofle
 
-A versão atual possui **138 respostas possíveis**, organizadas em **8 áreas**. São conceitos, categorias e problemas filosóficos, incluindo ética, teoria do conhecimento, filosofia da ciência, lógica, filosofia política, metafísica, tradições filosóficas e filosofia da religião.
+O Filosofle possui **100 respostas possíveis**, divididas em **8 áreas**. A seleção prioriza conceitos, doutrinas, problemas e termos de importância direta na Filosofia.
 
-**Importante:** esta relação é o banco de respostas, não o dicionário de tentativas. Você pode testar palavras comuns, plurais e verbos conjugados válidos em português, mas essas palavras não se tornam respostas por isso.
+**Importante:** esta é a lista de respostas, separada do dicionário de palavras aceitas nas tentativas. Palavras comuns, plurais e verbos conjugados podem continuar sendo aceitos como tentativas sem se tornarem respostas.
 
-## Ética (24)
+## Ética (15)
 
-Ética · Moral · Dever · Virtude · Justiça · Dignidade · Autonomia · Prudência · Empatia · Respeito · Caráter · Intenção · Mérito · Equidade · Altruísmo · Egoísmo · Senciência · Norma · Dilema · Valor · Culpa · Vício · Motivo · Alteridade
+Ética · Moral · Dever · Virtude · Justiça · Dignidade · Autonomia · Prudência · Equidade · Altruísmo · Egoísmo · Senciência · Dilema · Valor · Alteridade
 
-## Conhecimento (17)
+## Conhecimento (13)
 
-Razão · Saber · Dúvida · Verdade · Ceticismo · Crença · Evidência · Certeza · Memória · Percepção · Testemunho · Dogma · Empirismo · Opinião · Realidade · Aparência · Sabedoria
+Razão · Verdade · Ceticismo · Crença · Evidência · Percepção · Testemunho · Dogma · Empirismo · Opinião · Realidade · Aparência · Sabedoria
 
-## Ciência (12)
+## Ciência (7)
 
-Teoria · Hipótese · Paradigma · Indução · Método · Modelo · Observação · Abdução · Anomalia · Inferência · Falsidade · Crítica
+Teoria · Hipótese · Paradigma · Indução · Método · Abdução · Inferência
 
-## Lógica (19)
+## Lógica (12)
 
-Lógica · Falácia · Premissa · Argumento · Axioma · Silogismo · Validade · Solidez · Conclusão · Negação · Paradoxo · Conjunção · Disjunção · Tautologia · Sofisma · Dedutivo · Entimema · Implicação · Coerência
+Lógica · Falácia · Premissa · Argumento · Axioma · Silogismo · Validade · Solidez · Paradoxo · Tautologia · Sofisma · Entimema
 
-## Política (18)
+## Política (13)
 
-Lei · Poder · Estado · Democracia · Cidadania · Liberdade · Soberania · República · Tirania · Igualdade · Consenso · Direito · Governo · Cidadão · Opressão · Censura · Pluralismo · Autoridade
+Poder · Estado · Democracia · Cidadania · Liberdade · Soberania · República · Tirania · Igualdade · Consenso · Direito · Pluralismo · Autoridade
 
-## Metafísica (18)
+## Metafísica (15)
 
-Ser · Causa · Tempo · Essência · Ontologia · Ente · Substância · Acidente · Monismo · Dualismo · Matéria · Infinito · Finito · Cosmos · Forma · Nada · Realismo · Possível
+Ser · Causa · Tempo · Essência · Ontologia · Ente · Substância · Acidente · Monismo · Dualismo · Matéria · Infinito · Forma · Nada · Realismo
 
-## Tradições (20)
+## Tradições (18)
 
-Dao · Yin · Ren · Ahimsa · Ataraxia · Qi · Li · Yi · Yang · Atman · Brahman · Dharma · Karma · Nirvana · Ubuntu · Wuwei · Yoga · Dukkha · Anatman · Moksha
+Dao · Yin · Ren · Ahimsa · Ataraxia · Li · Yang · Atman · Brahman · Dharma · Karma · Nirvana · Ubuntu · Wuwei · Yoga · Dukkha · Anatman · Moksha
 
-## Religião (10)
+## Religião (7)
 
-Fé · Sagrado · Teísmo · Ateísmo · Teodiceia · Milagre · Alma · Mística · Mito · Cosmologia
+Fé · Sagrado · Teísmo · Ateísmo · Teodiceia · Alma · Cosmologia
 
 ## Critério de seleção
 
-Retiramos integralmente as áreas de Estética, Filosofia da Linguagem, Existência e Filosofia da Tecnologia, conforme a seleção do projeto. Mantivemos as oito áreas restantes. Palavras cotidianas como Ser, Tempo, Liberdade permanecem porque são problemas clássicos da filosofia.
+A seleção mantém as oito áreas anteriores, priorizando termos ligados a questões e tradições filosóficas. Algumas palavras que também podem aparecer em textos filosóficos ficaram fora por serem menos características como respostas do jogo. A dificuldade continua organizada por conceito e há respostas disponíveis em todos os níveis de cada área.
 
 ## Fontes dos dicionários de tentativas
 
 - https://github.com/pythonprobr/palavras
 - https://github.com/fserb/pt-br
-- A validação de grafia é distinta da curadoria das respostas.
+- https://github.com/gelocci/palavras-ptbr
+
+A validação de grafia é distinta da curadoria das respostas.

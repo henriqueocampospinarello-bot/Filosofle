@@ -677,10 +677,15 @@ for(const c of EDITORIAL_NEW_WORDS)CONCEPTS.push(c);
 /* Curadoria: apenas conceitos, problemas, doutrinas e categorias filosóficas podem ser respostas.
    Palavras usuais permanecem no dicionário geral como tentativas. */
 const EXCLUDED_NONPHILOSOPHICAL_TARGETS=new Set(["TESTE","VARIÁVEL","REPLICAÇÃO","REVISÃO","FATO","TEATRO","MÚSICA","POESIA","IRONIA","FALA","PROJETO","DADOS","ROBÔ","ALGORITMO","AUTOMAÇÃO","REDE","PADRÃO","RISCO","ECOLOGIA","CLIMA","NATUREZA","AXÉ","ANIMAL","BIOSFERA","ESPÉCIE","GERAÇÃO","ÁGUA","TERRA","PAISAGEM","RESÍDUO","EXTINÇÃO","FONTE","ACERTO","CONTROLE","AMOSTRA","POPULAÇÃO","MEDIÇÃO","CINEMA","BUDISMO","JAINISMO"]);
+/* Curadoria final: seleciona apenas 100 respostas mais características da Filosofia.
+   Termos retirados podem continuar válidos como tentativas no dicionário de português. */
+const EDITORIAL_EXCLUDED_TARGETS=new Set(["EMPATIA","RESPEITO","CARÁTER","INTENÇÃO","MÉRITO","NORMA","CULPA","VÍCIO","MOTIVO","SABER","DÚVIDA","CERTEZA","MEMÓRIA","MODELO","OBSERVAÇÃO","ANOMALIA","FALSIDADE","CRÍTICA","CONCLUSÃO","NEGAÇÃO","CONJUNÇÃO","DISJUNÇÃO","DEDUTIVO","IMPLICAÇÃO","COERÊNCIA","LEI","GOVERNO","CIDADÃO","OPRESSÃO","CENSURA","FINITO","COSMOS","POSSÍVEL","QI","YI","MILAGRE","MÍSTICA","MITO"]);
 const EXCLUDED_AREAS=new Set(["Estética","Linguagem","Existência","Tecnologia"]);
-for(let i=CONCEPTS.length-1;i>=0;i--){if(EXCLUDED_NONPHILOSOPHICAL_TARGETS.has(CONCEPTS[i].word)||EXCLUDED_AREAS.has(CONCEPTS[i].topic))CONCEPTS.splice(i,1);}
+for(let i=CONCEPTS.length-1;i>=0;i--){if(EXCLUDED_NONPHILOSOPHICAL_TARGETS.has(CONCEPTS[i].word)||EDITORIAL_EXCLUDED_TARGETS.has(CONCEPTS[i].word)||EXCLUDED_AREAS.has(CONCEPTS[i].topic))CONCEPTS.splice(i,1);}
 for(const c of CONCEPTS){
   if(c.word==='SENCIÊNCIA')c.topic='Ética';
+  if(c.word==='LÓGICA')c.level=1;
+  if(c.word==='PREMISSA')c.level=2;
   if(c.topic==='Tecnologia'){
     if(c.word==='VIÉS')c.level=1;
     if(c.word==='TÉCNICA')c.level=2;
