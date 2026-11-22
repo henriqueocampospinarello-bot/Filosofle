@@ -58,6 +58,9 @@ jobs:
           assert(ds>=0&&de>ds&&gs>=0&&ge>gs,'Validador de palavras ausente.');
           vm.runInContext(scripts[1].slice(ds,de)+scripts[1].slice(gs,ge)+';globalThis.checkWord=guessIsValid;',dictCtx);
           for(const w of ['PARADIGMA','PARADIGMAS','VIRTUDES','HIPOTESES','NARRATIVAS','PENSANDO','AÇÕES'])assert(dictCtx.checkWord(w),'Forma legítima recusada: '+w);
-          for(const w of ['XPTOZZ','PARADIGMZZ','PQZXWR'])assert(!dictCtx.checkWord(w),'Palavra inventada aceita: '+w);
+          for(const w of ['XPTOZZ','PARADIGMZZ','PQZXWR']){
+            console.log('VERIFICAÇÃO NEGATIVA',w,'normalização',dictCtx.normalize(w),'aceita',dictCtx.checkWord(w));
+            assert(!dictCtx.checkWord(w),'Palavra inventada aceita: '+w);
+          }
           console.log('OK: entrada sequencial, Backspace e plurais testados, além de '+words.length+' conceitos.');
           NODE
