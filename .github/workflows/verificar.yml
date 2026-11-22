@@ -38,6 +38,8 @@ jobs:
           assert(scripts[1].includes('loadAdditionalDictionary'),'Falta o dicionário de flexões.');
           for(const w of ['AÇÕES','PENSANDO','FALARAM','VIRTUDES']){ if(w==='FALARAM')continue;assert(html.includes(w),'Forma ausente: '+w); }
           assert(!scripts[1].includes('selectTile('),'Seleção de quadrados ainda ativa.');
+          assert(html.includes('pointer-events:none;user-select:none;cursor:default'),'O CSS ainda permite interagir com quadrados.');
+          assert(html.includes('filosofle-build'),'Identificador de versão ausente.');
           assert(!scripts[1].includes("tile.addEventListener('click'"),'Quadrados ainda clicáveis.');
           assert(!html.includes('Toque em qualquer quadrado da tentativa atual'),'Ajuda antiga de seleção ainda presente.');
           const context=vm.createContext({round:{typed:'     ',item:{word:'TESTE'}},lengthOf:()=>5,renderBoard:()=>{},saveDailyProgress:()=>{}});
