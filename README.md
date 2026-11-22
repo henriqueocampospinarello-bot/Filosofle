@@ -1,6 +1,8 @@
 # Filosofle
 
-Jogo de palavras inspirado no Wordle, com conceitos de Filosofia, pistas progressivas após erros e explicações de significado, origem, exemplos e aprofundamento.
+Jogo de palavras inspirado no Wordle, com 177 conceitos filosóficos, pistas progressivas após erros e explicações de significado, origem, exemplos e aprofundamento.
+
+Veja a lista completa de respostas em [PALAVRAS.md](PALAVRAS.md). O banco de respostas é separado do dicionário geral de tentativas.
 
 ## Jogar
 
@@ -18,6 +20,6 @@ Endereço esperado após ativação: https://henriqueocampospinarello-bot.github
 
 O Wordle aceita apenas palavras reconhecidas por uma base lexical de português brasileiro, ou os conceitos de Filosofia que constam do próprio jogo. Uma tentativa não reconhecida **não gasta** uma chance.
 
-A base externa é a lista [Palavras PT-BR](https://github.com/pythonprobr/palavras), derivada do dicionário ortográfico VERO/LibreOffice e disponibilizada sob a [licença MPL 2.0](https://github.com/pythonprobr/palavras/blob/master/LICENSE). O navegador consulta a lista pela internet e tenta armazená-la em cache para visitas seguintes. Trata-se de um vocabulário amplo, mas nenhuma lista fixa consegue conter todas as palavras, neologismos, regionalismos ou formas flexionadas do português.
+A base principal é [Palavras PT-BR](https://github.com/pythonprobr/palavras), derivada do dicionário ortográfico VERO/LibreOffice (licença MPL 2.0). Como complementos, são consultados o [léxico e as conjugações verbais](https://github.com/fserb/pt-br) (licença MIT) para ampliar a aceitação de plurais e verbos flexionados. Alguns exemplos frequentes, como **ações**, **virtudes**, **pensando**, **agiu** e **reflete**, são incluídos diretamente. Trata-se de um vocabulário amplo, mas nenhuma lista fixa garante todas as variações legítimas do português.
 
 O tamanho do dicionário não é apresentado na interface do jogo. Em caso de falha no carregamento, o site pede conexão para validar palavras que não estejam no banco dos próprios conceitos filosóficos.
