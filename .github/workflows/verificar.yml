@@ -52,14 +52,17 @@ jobs:
           assert.equal(context.round.typed,'ABCD ','O Backspace não apagou a última letra.');
           context.appendLetter('F');
           assert.equal(context.round.typed,'ABCDF','A escrita não retomou a última posição.');
-          const dictCtx=vm.createContext({normalize:s=>String(s).normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/[^A-Z]/g,'')});
+          const dictCtx=vm.createContext({});
+          const ns=scripts[1].indexOf('const normalize='),ne=scripts[1].indexOf('const displayWord=',ns);
+          assert(ns>=0&&ne>ns,'Normalizador não encontrado.');
+          vm.runInContext(scripts[1].slice(ns,ne)+';globalThis.normalizer=normalize;',dictCtx);
           vm.runInContext(scripts[0],dictCtx);
           const ds=scripts[1].indexOf('const COMMON_INFLECTIONS='),de=scripts[1].indexOf("let dictionaryState=",ds),gs=scripts[1].indexOf('function guessIsValid('),ge=scripts[1].indexOf('function checkGuessDictionary(',gs);
           assert(ds>=0&&de>ds&&gs>=0&&ge>gs,'Validador de palavras ausente.');
           vm.runInContext(scripts[1].slice(ds,de)+scripts[1].slice(gs,ge)+';globalThis.checkWord=guessIsValid;',dictCtx);
           for(const w of ['PARADIGMA','PARADIGMAS','VIRTUDES','HIPOTESES','NARRATIVAS','PENSANDO','AÇÕES'])assert(dictCtx.checkWord(w),'Forma legítima recusada: '+w);
           for(const w of ['XPTOZZ','PARADIGMZZ','PQZXWR']){
-            console.log('VERIFICAÇÃO NEGATIVA',w,'normalização',dictCtx.normalize(w),'aceita',dictCtx.checkWord(w));
+            console.log('VERIFICAÇÃO NEGATIVA',w,'normalização',dictCtx.normalizer(w),'aceita',dictCtx.checkWord(w));
             assert(!dictCtx.checkWord(w),'Palavra inventada aceita: '+w);
           }
           console.log('OK: entrada sequencial, Backspace e plurais testados, além de '+words.length+' conceitos.');
