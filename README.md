@@ -20,6 +20,12 @@ Endereço esperado após ativação: https://henriqueocampospinarello-bot.github
 
 O Wordle aceita apenas palavras reconhecidas por uma base lexical de português brasileiro, ou os conceitos de Filosofia que constam do próprio jogo. Uma tentativa não reconhecida **não gasta** uma chance.
 
-A base principal é [Palavras PT-BR](https://github.com/pythonprobr/palavras), derivada do dicionário ortográfico VERO/LibreOffice (licença MPL 2.0). Como complementos, são consultados o [léxico e as conjugações verbais](https://github.com/fserb/pt-br) (licença MIT) para ampliar a aceitação de plurais e verbos flexionados. Alguns exemplos frequentes, como **ações**, **virtudes**, **pensando**, **agiu** e **reflete**, são incluídos diretamente. Trata-se de um vocabulário amplo, mas nenhuma lista fixa garante todas as variações legítimas do português.
+O jogo reúne **três fontes de vocabulário diferentes**, carregadas de forma independente (com espelhos de download e cache no navegador):
+
+1. **[Palavras PT-BR (pythonprobr)](https://github.com/pythonprobr/palavras):** lista derivada do VERO/LibreOffice (MPL 2.0).
+2. **[fserb/pt-br](https://github.com/fserb/pt-br):** léxico geral e arquivo adicional de conjugações verbais (MIT).
+3. **[palavras-ptbr, de Gerson Locci](https://github.com/gelocci/palavras-ptbr):** lista por frequência de uso, baseada em corpora da Leipzig Corpora Collection. Licença CC BY 4.0; crédito a Gerson Locci e aos dados da Leipzig. Somente as entradas classificadas como `correto` entram na validação.
+
+As listas são combinadas **somente para validar tentativas**, nunca para ampliar as 138 respostas filosóficas. O jogo também reconhece plurais regulares a partir de formas singulares já registradas (como *paradigmas*, *animais*, *homens*, *flores*) e inclui flexões comuns diretamente (*ações*, *pensando*, *agiu*). Uma tentativa ausente de todas as bases não consome chance; enquanto um dos dicionários ainda carrega, o jogo pede para repetir a tentativa. A cobertura é ampla, mas não garante todas as flexões, regionalismos ou neologismos.
 
 O tamanho do dicionário não é apresentado na interface do jogo. Em caso de falha no carregamento, o site pede conexão para validar palavras que não estejam no banco dos próprios conceitos filosóficos.
