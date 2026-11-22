@@ -711,6 +711,8 @@ const COMMON_INFLECTIONS=['AÇÕES','QUESTÕES','RAZÕES','OPINIÕES','IDEIAS','
 const VALID_GUESSES=new Set([...CONCEPTS.map(c=>normalize(c.word)),...COMMON_INFLECTIONS.map(normalize)]);
 let dictionaryState='loading',dictionaryPromise=null;
 function dictionaryMessage(message){if(round&&!round.done&&$('game')?.classList.contains('active'))$('gameMessage').textContent=message;}
+function reportDictionaryReady(){if(VALID_GUESSES.size>=25000&&dictionaryState!=='ready'){dictionaryState='ready';dictionaryMessage('Dicionário pronto. Continue tentando descobrir a palavra.');}}
+
 async function downloadPortugueseWords(){
   if('caches' in window){
     try{const cache=await caches.open(DICTIONARY_CACHE),entry=await cache.match(DICTIONARY_CACHE_KEY);
@@ -757,7 +759,7 @@ async function loadAdditionalDictionary(){
             if(term.length>=1&&term.length<=10){VALID_GUESSES.add(term);added++;}
           }
         }
-        if(added>2000)return;
+        if(added>2000){reportDictionaryReady();return added;}
       }catch(error){/* Tenta espelho alternativo. */}
       finally{clearTimeout(timer);}
     }
@@ -768,28 +770,28 @@ function loadPortugueseDictionary(){
   if(dictionaryPromise)return dictionaryPromise;
   dictionaryState='loading';
   dictionaryPromise=(async()=>{
+    // As fontes são independentes: uma pode funcionar mesmo que a outra falhe.
+    const supplemental=loadAdditionalDictionary().catch(()=>0);
     try{
-      const inflectedPromise=loadAdditionalDictionary();
       const text=await downloadPortugueseWords(),additions=new Set();
       for(const raw of text.split(/\r?\n/)){
         const word=raw.trim();
-        // Mantem apenas palavras simples: sem numeros, tracos ou espacos.
-        if(!word||!(/^[\p{L}]+$/u.test(word)))continue;
+        if(!word||!/^[\p{L}]+$/u.test(word))continue;
         const normalized=normalize(word);
         if(normalized.length>=1&&normalized.length<=10)additions.add(normalized);
       }
-      if(additions.size<25000)throw new Error('Lista incompleta.');
+      if(additions.size<25000)throw new Error('Lista principal incompleta.');
       additions.forEach(w=>VALID_GUESSES.add(w));
-      await inflectedPromise;
-      dictionaryState='ready';
-      dictionaryMessage('Dicionario pronto. Continue tentando descobrir a palavra.');
-      return true;
+      reportDictionaryReady();
     }catch(error){
-      dictionaryState='failed';
-      dictionaryMessage('Nao foi possivel consultar o dicionario. Verifique sua conexao.');
-      return false;
-    }finally{dictionaryPromise=null;}
-  })();
+      // Se a fonte principal falhar, aceita a alternativa quando estiver pronta.
+      await supplemental;
+    }
+    if(VALID_GUESSES.size>=25000){reportDictionaryReady();return true;}
+    dictionaryState='failed';
+    dictionaryMessage('Não foi possível consultar o dicionário. Verifique sua conexão.');
+    return false;
+  })().finally(()=>{dictionaryPromise=null;});
   return dictionaryPromise;
 }
 /* Plurais regulares de palavras documentadas: PARADIGMA -> PARADIGMAS.
