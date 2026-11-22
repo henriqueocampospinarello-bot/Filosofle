@@ -37,7 +37,19 @@ jobs:
           const topics=[...new Set(words.map(w=>w.topic))];
           assert.equal(topics.length,8,'O jogo deve conter oito áreas após a curadoria.');
           for(const topic of topics)for(let n=1;n<=4;n++)assert(words.some(x=>x.topic===topic&&x.level===n),'Nível sem palavra em '+topic+': '+n);
-          assert(scripts[1].includes('loadAdditionalDictionary'),'Falta o dicionário de flexões.');
+          const ss=scripts[1].indexOf('const DICTIONARY_SOURCES='),se=scripts[1].indexOf('const DICTIONARY_CACHE=',ss);
+          assert(ss>=0&&se>ss,'Fontes de dicionários não encontradas.');
+          const sources=vm.runInNewContext(scripts[1].slice(ss,se)+';DICTIONARY_SOURCES;');
+          assert.equal(sources.length,3,'Devem existir exatamente três dicionários independentes.');
+          assert.equal(new Set(sources.map(x=>x.id)).size,3,'Os dicionários precisam ter identificadores distintos.');
+          assert.equal(sources.reduce((n,x)=>n+x.parts.length,0),4,'O léxico e as conjugações devem ser arquivos complementares.');
+          for(const source of sources)for(const part of source.parts){
+            assert.equal(part.mirrors.length,2,'Cada base precisa de duas opções de download.');
+            assert(part.minWords>1000,'A verificação precisa rejeitar uma base incompleta.');
+          }
+          assert(sources.some(x=>x.id==='palavras'),'Fonte Palavras PT-BR ausente.');
+          assert(sources.some(x=>x.id==='fserb'&&x.parts.some(p=>p.id.includes('conjugacoes'))),'Conjugações verbais ausentes.');
+          assert(sources.some(x=>x.id==='gelocci'&&x.parts.some(p=>p.format==='tsv')),'Dicionário de corpus ausente.');
           for(const w of ['AÇÕES','PENSANDO','FALARAM','VIRTUDES']){ if(w==='FALARAM')continue;assert(html.includes(w),'Forma ausente: '+w); }
           assert(!scripts[1].includes('selectTile('),'Seleção de quadrados ainda ativa.');
           assert(html.includes('pointer-events:none;user-select:none;cursor:default'),'O CSS ainda permite interagir com quadrados.');
@@ -69,5 +81,18 @@ jobs:
             console.log('VERIFICAÇÃO NEGATIVA',w,'normalização',dictCtx.normalizer(w),'aceita',dictCtx.checkWord(w));
             assert(!dictCtx.checkWord(w),'Palavra inventada aceita: '+w);
           }
-          console.log('OK: entrada sequencial, Backspace e plurais testados, além de '+words.length+' conceitos.');
+          const testEnv=vm.createContext({VALID_GUESSES:new Set(),setTimeout});
+          vm.runInContext(scripts[1].slice(ns,ne),testEnv);
+          const ps=scripts[1].indexOf('async function parseDictionaryPart('),pe=scripts[1].indexOf('async function loadDictionaryPart(',ps);
+          assert(ps>=0&&pe>ps,'Leitor de dicionários ausente.');
+          vm.runInContext(scripts[1].slice(ps,pe)+';globalThis.readDictionary=parseDictionaryPart;',testEnv);
+          Promise.all([
+            testEnv.readDictionary('PARADIGMA\nFLOR\n',{format:'lines'}),
+            testEnv.readDictionary('ANDARAM\nESTUDANDO\n',{format:'lines'}),
+            testEnv.readDictionary('flores\t250\tcorreto\nestrangeirismo\t100\taceitavel\n',{format:'tsv'})
+          ]).then(()=>{
+            for(const term of ['PARADIGMA','FLOR','ANDARAM','ESTUDANDO','FLORES'])assert(testEnv.VALID_GUESSES.has(term),'Palavra válida ausente após leitura: '+term);
+            assert(!testEnv.VALID_GUESSES.has('ESTRANGEIRISMO'),'A fonte TSV deve excluir entradas não classificadas como corretas.');
+            console.log('OK: três dicionários, corpus TSV, conjugações, plurais, digitação sequencial e 138 respostas.');
+          }).catch(error=>{console.error(error);process.exitCode=1;});
           NODE
