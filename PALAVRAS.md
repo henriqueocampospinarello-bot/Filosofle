@@ -1,8 +1,8 @@
 # Todas as palavras do Filosofle
 
-O Filosofle possui **100 respostas possíveis**, divididas em **8 áreas**. A seleção prioriza conceitos, doutrinas, problemas e termos de importância direta na Filosofia.
+O Filosofle possui **86 respostas possíveis**, divididas em **6 áreas**. Cada área contém pelo menos 10 conceitos filosóficos para garantir variedade nas partidas.
 
-**Importante:** esta é a lista de respostas, separada do dicionário de palavras aceitas nas tentativas. Palavras comuns, plurais e verbos conjugados podem continuar sendo aceitos como tentativas sem se tornarem respostas.
+**Importante:** este é o banco de respostas, separado do dicionário geral de palavras aceitas nas tentativas. Uma palavra comum pode continuar válida como tentativa sem se tornar resposta.
 
 ## Ética (15)
 
@@ -11,10 +11,6 @@ O Filosofle possui **100 respostas possíveis**, divididas em **8 áreas**. A se
 ## Conhecimento (13)
 
 Razão · Verdade · Ceticismo · Crença · Evidência · Percepção · Testemunho · Dogma · Empirismo · Opinião · Realidade · Aparência · Sabedoria
-
-## Ciência (7)
-
-Teoria · Hipótese · Paradigma · Indução · Método · Abdução · Inferência
 
 ## Lógica (12)
 
@@ -32,13 +28,9 @@ Ser · Causa · Tempo · Essência · Ontologia · Ente · Substância · Aciden
 
 Dao · Yin · Ren · Ahimsa · Ataraxia · Li · Yang · Atman · Brahman · Dharma · Karma · Nirvana · Ubuntu · Wuwei · Yoga · Dukkha · Anatman · Moksha
 
-## Religião (7)
-
-Fé · Sagrado · Teísmo · Ateísmo · Teodiceia · Alma · Cosmologia
-
 ## Critério de seleção
 
-A seleção mantém as oito áreas anteriores, priorizando termos ligados a questões e tradições filosóficas. Algumas palavras que também podem aparecer em textos filosóficos ficaram fora por serem menos características como respostas do jogo. A dificuldade continua organizada por conceito e há respostas disponíveis em todos os níveis de cada área.
+Mantivemos as áreas com pelo menos 10 respostas filosóficas. Foram retiradas Ciência e Filosofia da Religião, que tinham 7 palavras cada. O jogo continua com quatro níveis de dificuldade e as 86 respostas mantidas.
 
 ## Fontes dos dicionários de tentativas
 
@@ -46,4 +38,4 @@ A seleção mantém as oito áreas anteriores, priorizando termos ligados a ques
 - https://github.com/fserb/pt-br
 - https://github.com/gelocci/palavras-ptbr
 
-A validação de grafia é distinta da curadoria das respostas.
+A validação da grafia é distinta da curadoria das respostas.

@@ -27,15 +27,16 @@ jobs:
           const ctx={};
           vm.runInNewContext(scripts[0]+';globalThis.RESULT=CONCEPTS.map(c=>({word:c.word,topic:c.topic,level:c.level}));',ctx);
           const words=ctx.RESULT;
-          assert.equal(words.length,100,'Quantidade de palavras revisadas diferente do esperado.');
-          for(const excluded of ['Estética','Linguagem','Existência','Tecnologia'])assert(!words.some(w=>w.topic===excluded),'Área que deveria ter sido removida: '+excluded);
+          assert.equal(words.length,86,'Quantidade de palavras revisadas diferente do esperado.');
+          for(const excluded of ['Estética','Linguagem','Existência','Tecnologia','Ciência','Religião'])assert(!words.some(w=>w.topic===excluded),'Área que deveria ter sido removida: '+excluded);
           const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
           const set=new Set(words.map(x=>norm(x.word)));
           assert.equal(set.size,words.length,'Existem palavras duplicadas.');
           for(const removed of ['ÁGUA','TEATRO','RESÍDUO','ROBÔ','MÚSICA','CINEMA','AMOSTRA','DADOS','NEGAÇÃO'])assert(!set.has(norm(removed)), 'Resposta inadequada: '+removed);
           for(const w of words)assert(norm(w.word).length>=1&&norm(w.word).length<=10,'Palavra com tamanho inválido: '+w.word);
           const topics=[...new Set(words.map(w=>w.topic))];
-          assert.equal(topics.length,8,'O jogo deve conter oito áreas após a curadoria.');
+          assert.equal(topics.length,6,'O jogo deve conter seis áreas após a curadoria.');
+          for(const topic of topics)assert(words.filter(w=>w.topic===topic).length>=10,'Área com menos de 10 conceitos: '+topic);
           for(const topic of topics)for(let n=1;n<=4;n++)assert(words.some(x=>x.topic===topic&&x.level===n),'Nível sem palavra em '+topic+': '+n);
           const ss=scripts[1].indexOf('const DICTIONARY_SOURCES='),se=scripts[1].indexOf('const DICTIONARY_CACHE=',ss);
           assert(ss>=0&&se>ss,'Fontes de dicionários não encontradas.');
@@ -93,6 +94,6 @@ jobs:
           ]).then(()=>{
             for(const term of ['PARADIGMA','FLOR','ANDARAM','ESTUDANDO','FLORES'])assert(testEnv.VALID_GUESSES.has(term),'Palavra válida ausente após leitura: '+term);
             assert(!testEnv.VALID_GUESSES.has('ESTRANGEIRISMO'),'A fonte TSV deve excluir entradas não classificadas como corretas.');
-            console.log('OK: três dicionários, corpus TSV, conjugações, plurais, digitação sequencial e 100 respostas.');
+            console.log('OK: três dicionários, corpus TSV, conjugações, plurais, digitação sequencial e 86 respostas.');
           }).catch(error=>{console.error(error);process.exitCode=1;});
           NODE
