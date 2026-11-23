@@ -40,7 +40,34 @@ jobs:
           assert(html.includes('id="noHintsFromHome"'),'Botão Sem pistas ausente.');
           assert(html.includes('const stats=activeStatistics(store.studied)'),'Estatísticas não estão restritas às respostas atuais.');
           assert(html.includes('data-collection-filter="lost"'),'A coleção precisa separar derrotas e descobertas.');
-          assert(html.includes('current-86-v2'),'A correção de vitórias atuais está ausente.');
+          assert(html.includes('current-86-v3'),'A correção de vitórias atuais está ausente.');
+          assert(!html.includes('id="collectionSearch"'),'O campo de busca na coleção deveria ter sido removido.');
+          const statStart=scripts[1].indexOf('const activeStatistics=');
+          const statEnd=scripts[1].indexOf('const defaults=()=>',statStart);
+          assert(statStart>=0&&statEnd>statStart,'Cálculo das estatísticas não encontrado.');
+          const statCtx=vm.createContext({CONCEPTS:words,normalize:norm});
+          vm.runInContext(scripts[1].slice(statStart,statEnd)+';globalThis.stats=activeStatistics;',statCtx);
+          const sample={ETICA:{plays:2,wins:2,won:true},VIRTUDE:{plays:2,wins:2,won:true},MORAL:{plays:1,wins:1,won:true},ARGUMENTO:{plays:1,wins:0,won:false},PARADIGMA:{plays:3,wins:2,won:true}};
+          const example=statCtx.stats(sample);
+          assert.equal(example.played,4,'Partidas incluem vitórias duplicadas ou palavras excluídas.');
+          assert.equal(example.wins,3,'Vitórias não correspondem às palavras descobertas.');
+          assert.equal(example.losses,1,'Derrotas não batem com as partidas.');
+          assert.equal(example.played,example.wins+example.losses,'Partidas precisam fechar com vitórias e derrotas.');
+          const migrationStart=scripts[1].indexOf('const STORE_KEY='),migrationEnd=scripts[1].indexOf('let store=loadStore();',migrationStart);
+          assert(migrationStart>=0&&migrationEnd>migrationStart,'Migração do histórico não encontrada.');
+          function validateMigration(raw){
+            const context=vm.createContext({CONCEPTS:words,WORD_BY_KEY:new Map(words.map(c=>[norm(c.word),c])),normalize:norm,localStorage:{getItem:()=>JSON.stringify(raw)}});
+            vm.runInContext(scripts[1].slice(migrationStart,migrationEnd)+';globalThis.saved=loadStore();',context);
+            return JSON.parse(JSON.stringify(context.saved));
+          }
+          const migrated=validateMigration({played:6,wins:5,studied:sample,solvedWords:['ETICA','VIRTUDE','MORAL','PARADIGMA']});
+          assert.equal(migrated.played,4,'Partidas armazenadas não foram descontadas.');
+          assert.equal(migrated.wins,3,'Vitórias armazenadas não foram corrigidas.');
+          assert.equal(migrated.studied.ETICA.wins,1,'Vitórias duplicadas permanecem no histórico da palavra.');
+          assert(!migrated.studied.PARADIGMA,'Palavras excluídas permanecem no registro.');
+          const repeated=validateMigration(migrated);
+          assert.equal(repeated.played,4,'Atualizações repetidas alteraram o número de partidas.');
+          assert.equal(repeated.wins,3,'Atualizações repetidas alteraram as vitórias.');
           assert(html.includes('activeStatistics(store.studied)'),'O contador por palavras atuais está ausente.');
           const detailCtx=vm.createContext({});
           vm.runInContext(scripts[0],detailCtx);

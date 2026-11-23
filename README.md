@@ -8,7 +8,7 @@ Veja a lista completa de respostas em [PALAVRAS.md](PALAVRAS.md). O banco de res
 
 Abra `index.html` no navegador ou use o endereço do GitHub Pages após a publicação.
 
-O jogo oferece Jogo livre e Sem pistas, sem uma aba separada de desafios. As descobertas, vitórias e partidas são calculadas somente a partir das 86 palavras atuais, preservando a possibilidade de revisar as palavras ainda não acertadas na seção Derrotas. A migração do histórico acontece uma única vez.
+O jogo oferece Jogo livre e Sem pistas, sem uma aba separada de desafios. As descobertas, vitórias e partidas são calculadas somente a partir das 86 palavras atuais, preservando a possibilidade de revisar as palavras ainda não acertadas na seção Derrotas. Os números registram a identidade das palavras acertadas e as derrotas reais no banco atual: uma palavra só pode render uma vitória, mesmo que o histórico anterior tenha contabilizado acertos repetidos. As partidas duplicadas são descontadas também dos registros salvos no navegador. Ao consultar a coleção, o campo de pesquisa não aparece; permanecem os filtros Descobertas, Derrotas, Todas e Favoritas. O histórico é normalizado sem descontos duplicados após atualizar a página.
 
 O jogo é feito com HTML, CSS e JavaScript. A versão publicada é um arquivo único, sem necessidade de instalar pacotes, criar conta ou configurar servidor. O progresso é armazenado localmente no navegador.
 
