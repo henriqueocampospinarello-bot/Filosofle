@@ -40,6 +40,12 @@ jobs:
           assert(html.includes('id="noHintsFromHome"'),'Botão Sem pistas ausente.');
           assert(html.includes('const stats=activeStatistics(store.studied)'),'Estatísticas não estão restritas às respostas atuais.');
           assert(html.includes('data-collection-filter="lost"'),'A coleção precisa separar derrotas e descobertas.');
+          assert(!html.includes('data-collection-filter="favorite"'),'Favoritas não deveria existir na coleção.');
+          assert(!html.includes("fav.addEventListener"),'Botão de favoritos não deveria existir.');
+          assert(!html.includes('<span>Descobertas</span>'),'A página inicial ainda exibe Descobertas.');
+          assert(html.includes("displayWord(a.word).localeCompare(displayWord(b.word),'pt-BR'"),'Coleção não está em ordem alfabética.');
+          assert(html.includes('id="discoverySimple"'),'Introdução simples não aparece na tela de estudos.');
+
           assert(html.includes('current-86-v3'),'A correção de vitórias atuais está ausente.');
           assert(!html.includes('id="collectionSearch"'),'O campo de busca na coleção deveria ter sido removido.');
           const statStart=scripts[1].indexOf('const activeStatistics=');
@@ -76,9 +82,13 @@ jobs:
             assert(fs.existsSync(path),'Aprofundamento ausente: '+path);
             vm.runInContext(fs.readFileSync(path,'utf8'),detailCtx);
           }
-          vm.runInContext(';globalThis.DEEPS=CONCEPTS.map(c=>({word:c.word,parts:[c.deepOrigin,c.deepConnection,c.deepDebate]}));',detailCtx);
+          vm.runInContext(';globalThis.DEEPS=CONCEPTS.map(c=>({word:c.word,parts:[c.deepOrigin,c.deepConnection,c.deepDebate],simple:c.simpleGuide}));',detailCtx);
           assert.equal(detailCtx.DEEPS.length,86);
           for(const c of detailCtx.DEEPS)for(const part of c.parts)assert(typeof part==='string'&&part.length>=110,'Aprofundamento insuficiente: '+c.word);
+          for(const c of detailCtx.DEEPS)assert(typeof c.simple==='string'&&c.simple.length>=240,'Introdução simples ausente ou curta: '+c.word);
+          const accident=detailCtx.DEEPS.find(c=>c.word==='ACIDENTE');
+          assert(accident&&accident.simple.includes('arché')&&accident.simple.includes('Anaximandro'),'Acidente não explica a arché pré-socrática.');
+
           const topics=[...new Set(words.map(w=>w.topic))];
           assert.equal(topics.length,6,'O jogo deve conter seis áreas após a curadoria.');
           for(const topic of topics)assert(words.filter(w=>w.topic===topic).length>=10,'Área com menos de 10 conceitos: '+topic);

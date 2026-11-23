@@ -39,3 +39,9 @@ Os 86 conceitos têm origem histórica, autores, relações entre ideias e contr
 ## Flexões
 
 O jogo já aceita os pares de gênero revisados, plurais regulares e formas irregulares da lista interna, além dos dicionários externos. Não é possível prometer cobertura de 99% do português sem uma avaliação lexical representativa.
+
+## Interface e linguagem
+
+A página inicial mostra somente **Partidas**, **Vitórias** e **Derrotas** (Partidas = Vitórias + Derrotas). A coleção mantém **Descobertas**, **Derrotas** e **Todas**, sem Favoritas; os conceitos aparecem sempre em ordem alfabética do português brasileiro. Cada um dos 86 conceitos inclui uma introdução acessível, com exemplo e contexto, seguida de aprofundamentos sobre origem histórica, autores e controvérsias. No caso de *Acidente*, a palavra grega **arché** é explicada como princípio ou fundamento procurado por pensadores pré-socráticos; não é confundida com acidente em Aristóteles.
+
+Os dados do jogo são mantidos no armazenamento local de cada navegador. A migração e correção das estatísticas são aplicadas automaticamente quando o jogador abre a versão nova; não há contas de usuários nem banco central que permita alterar os dados de dispositivos que ainda não acessaram a atualização.
