@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#111214"><meta name="filosofle-build" content="20261122-86-expanded-explanations-stats-collection"><meta name="description" content="Filosofle: um Wordle filosófico para jogar, descobrir e aprender com cada palavra."><title>Filosofle — uma palavra, muitas ideias</title><style>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#111214"><meta name="filosofle-build" content="20261122-consistent-statistics-no-collection-search"><meta name="description" content="Filosofle: um Wordle filosófico para jogar, descobrir e aprender com cada palavra."><title>Filosofle — uma palavra, muitas ideias</title><style>
 :root{color-scheme:dark;--bg:#111214;--panel:#1b1c20;--panel2:#202127;--border:#37383e;--text:#f3f4f8;--muted:#a5a7b2;--soft:#767985;--blue:#5599ef;--blue-deep:#275eaf;--blue-glow:#5599ef31;--gold:#d5b75f;--tileMiss:#464850;--max:570px}
 *{box-sizing:border-box}html{min-width:310px}body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.55;background:var(--bg);color:var(--text)}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #86b8ff;outline-offset:3px}a{color:#a4caff}p,h1,h2,h3{margin-top:0}.app{width:min(100% - 24px,var(--max));margin:0 auto;padding-bottom:60px}.topbar{height:62px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}.topbar h1{font-size:20px;font-weight:760;letter-spacing:.08em;margin:0}.icon-button{width:36px;height:36px;border:1px solid var(--border);border-radius:9px;color:var(--text);background:transparent;font-size:20px;display:grid;place-items:center}.icon-button:hover,.secondary:hover{background:var(--panel2);border-color:#626775}.tabs{display:grid;grid-template-columns:repeat(2,1fr);border-bottom:1px solid var(--border);margin-bottom:14px}
 .collection-view-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
@@ -70,7 +70,7 @@
 <section id="setup" class="view"><div class="section-heading"><div class="eyebrow">Nova partida</div><h2>Escolha seu jogo</h2><p>Os níveis dependem dos conceitos, não do tamanho das palavras.</p></div><div class="panel"><div class="setting"><fieldset><legend>Dificuldade</legend><div class="levels" id="levelButtons"><button class="level-btn" data-level="1">Fácil<small>Para começar</small></button><button class="level-btn active" data-level="2">Médio<small>Associar ideias</small></button><button class="level-btn" data-level="3">Difícil<small>Mais conceitos</small></button><button class="level-btn" data-level="4">Extremo<small>Bem avançado</small></button></div></fieldset></div><div class="setting"><label for="topicSelect">Assunto</label><select id="topicSelect" class="field"><option value="all">Todos os assuntos</option></select></div><div id="poolInfo" class="setup-summary" aria-live="polite"></div></div><div class="row-actions"><button id="startGame" class="btn primary wide">Descobrir palavra ›</button><button id="setupBack" class="btn secondary wide">Voltar</button></div></section>
 <section id="game" class="view"><div class="game-top"><div class="game-heading"><strong id="gameTitle">Descubra a palavra</strong></div><div class="game-meta"><span id="gameTopic"></span><span id="attemptsText"></span></div></div><div id="gameMessage" class="game-message" role="status" aria-live="polite"></div><div id="board" class="board" role="grid" aria-label="Tabuleiro de tentativas. As letras são preenchidas da esquerda para a direita."></div><div id="keyboard" class="keyboard" aria-label="Teclado do jogo"></div><div id="hintPanel" class="hint-panel"><div class="hint-header"><strong>Pistas para pensar</strong><span id="hintCount" class="hint-count">0 de 3</span></div><p id="hintEmpty" class="hint-empty">A primeira pista aparece depois de uma tentativa incorreta.</p><ol id="hintList" class="hint-list" aria-live="polite" aria-relevant="additions"></ol></div><button id="exitGame" class="game-exit">Sair da partida</button></section>
 <section id="discovery" class="view"><div class="discovery-header"><span id="discoveryStatus" class="overline"></span><h2 id="discoveryWord"></h2><div id="discoveryStars" class="stars"></div><p id="discoveryIntro"></p></div><div class="insight-card"><div class="eyebrow">O que significa?</div><p id="discoveryMeaning"></p></div><div class="learn-tabs" role="group" aria-label="Conheça a palavra"><button data-lesson="history" class="learn-tab active">De onde veio?</button><button data-lesson="example" class="learn-tab">Na vida real</button><button data-lesson="meaning" class="learn-tab">Entenda melhor</button></div><div class="lesson-text" id="lessonText" aria-live="polite"></div><div class="learn-actions"><button id="discoveryContinue" class="btn primary wide">Próxima palavra ›</button><button id="discoveryCollection" class="btn secondary wide">Ver minha coleção</button></div></section>
-<section id="collection" class="view"><div class="section-heading"><div class="eyebrow">Seus conceitos</div><h2>Coleção</h2><p>Revise suas descobertas e as palavras que ainda não conseguiu acertar.</p></div><div class="panel" style="margin-bottom:13px"><div id="collectionSummary" class="subtle"></div><div class="meter" aria-hidden="true"><span id="collectionBar" style="width:0%"></span></div></div><div class="collection-controls"><input id="collectionSearch" class="field" placeholder="Buscar palavra..." aria-label="Buscar na coleção"><div class="collection-view-tabs" role="group" aria-label="Mostrar palavras"><button class="collection-view-btn active" type="button" data-collection-filter="won">Descobertas</button><button class="collection-view-btn" type="button" data-collection-filter="lost">Derrotas</button><button class="collection-view-btn" type="button" data-collection-filter="all">Todas</button><button class="collection-view-btn" type="button" data-collection-filter="favorite">Favoritas</button></div></div><div id="collectionList" class="collection-list"></div></section>
+<section id="collection" class="view"><div class="section-heading"><div class="eyebrow">Seus conceitos</div><h2>Coleção</h2><p>Revise suas descobertas e as palavras que ainda não conseguiu acertar.</p></div><div class="panel" style="margin-bottom:13px"><div id="collectionSummary" class="subtle"></div><div class="meter" aria-hidden="true"><span id="collectionBar" style="width:0%"></span></div></div><div class="collection-controls"><div class="collection-view-tabs" role="group" aria-label="Mostrar palavras"><button class="collection-view-btn active" type="button" data-collection-filter="won">Descobertas</button><button class="collection-view-btn" type="button" data-collection-filter="lost">Derrotas</button><button class="collection-view-btn" type="button" data-collection-filter="all">Todas</button><button class="collection-view-btn" type="button" data-collection-filter="favorite">Favoritas</button></div></div><div id="collectionList" class="collection-list"></div></section>
 </main></div>
 <dialog id="helpDialog"><h2>Como jogar</h2><p>Descubra a palavra escondida preenchendo os quadrados em sequência, da esquerda para a direita. Não é possível selecionar um quadrado isolado. Use <strong>Backspace</strong> para apagar a última letra e <strong>Enter</strong> para confirmar a palavra completa.</p><h3>Cores das letras</h3><p><strong style="color:#7bb6ff">Azul:</strong> letra na posição certa. <strong style="color:#ddc46c">Amarelo:</strong> letra presente, mas em outra posição. <strong>Cinza:</strong> letra ausente, considerando repetições.</p><h3>Aprenda enquanto joga</h3><p>Nos jogos comuns, <strong>uma pista surge automaticamente após cada uma das três primeiras tentativas incorretas</strong>. A primeira apresenta o problema; a segunda orienta o raciocínio; a terceira traz contexto ou uma referência mais específica. O desafio “Sem pistas” não mostra pistas. Quando a partida termina, a descoberta mostra significado, origem ou contexto histórico, exemplo e uma explicação complementar. Não há questionário obrigatório.</p><h3>Dificuldade e modos</h3><p>A dificuldade considera o conhecimento exigido, <strong>não o número de letras</strong>. Há o jogo livre e o modo Sem pistas. A Coleção mostra os conceitos estudados que ainda fazem parte do jogo.</p><h3>Sobre as tentativas</h3><p>As respostas são apenas conceitos filosóficos, mas as tentativas podem ser outras palavras reais do português, incluindo plurais e formas conjugadas de verbos. É possível digitar sem acentos, inclusive para respostas acentuadas. Palavras não reconhecidas não consomem tentativas. Na primeira visita, os dicionários são carregados pela internet.</p><p>Fontes lexicais: <a href="https://github.com/pythonprobr/palavras" target="_blank" rel="noopener noreferrer">Palavras PT-BR</a>, <a href="https://github.com/fserb/pt-br" target="_blank" rel="noopener noreferrer">fserb/pt-br</a> e <a href="https://github.com/gelocci/palavras-ptbr" target="_blank" rel="noopener noreferrer">palavras-ptbr, de Gerson Locci</a> (CC BY 4.0, dados da Leipzig Corpora Collection).</p><button id="helpClose" class="btn primary wide">Entendi</button></dialog>
 <div id="roundTransition" class="round-transition" hidden aria-live="polite"><div class="transition-message"><span id="transitionLabel"></span><strong id="transitionWord"></strong><small id="transitionSubline"></small></div></div>
@@ -879,18 +879,23 @@ function checkGuessDictionary(guess){
 const TOPICS=[...new Set(CONCEPTS.map(c=>c.topic))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
 const STORE_KEY='filosofle-wordle-v1';
 const activeStatistics=(studied)=>{
-  let played=0,wins=0,discovered=0,defeatedWords=0;
+  // A palavra acertada conta uma só vitória, mesmo que o histórico antigo
+  // tenha vitórias duplicadas. Derrotas permanecem registradas como partidas.
+  let played=0,wins=0,losses=0,defeatedWords=0;
   for(const c of CONCEPTS){
     const e=studied?.[normalize(c.word)];
     if(!e)continue;
-    const won=Boolean(e.won===true||Number(e.wins)>0);
-    const wordWins=Math.max(won?1:0,Math.floor(Math.max(0,Number(e.wins)||0)));
-    const wordPlays=Math.max(wordWins,Math.floor(Math.max(0,Number(e.plays)||0)));
-    played+=wordPlays;wins+=wordWins;
-    if(won)discovered++;
-    else if(wordPlays>0)defeatedWords++;
+    const priorWins=Math.max(0,Math.floor(Number(e.wins)||0));
+    const won=e.won===true||priorWins>0;
+    const uniqueWin=won?1:0;
+    const priorPlays=Math.max(0,Math.floor(Number(e.plays)||0));
+    const wordLosses=Math.max(0,priorPlays-Math.max(priorWins,uniqueWin));
+    wins+=uniqueWin;
+    losses+=wordLosses;
+    played+=uniqueWin+wordLosses;
+    if(wordLosses>0)defeatedWords++;
   }
-  return {played,wins,discovered,defeatedWords};
+  return {played,wins,discovered:wins,losses,defeatedWords};
 };
 
 const defaults=()=>({played:0,wins:0,streak:0,bestStreak:0,studied:{},recent:[],solvedWords:[],favorites:[],daily:{},quizCorrect:0});
@@ -898,31 +903,37 @@ function loadStore(){
   try{
     const raw=JSON.parse(localStorage.getItem(STORE_KEY)||'null');
     if(!raw||typeof raw!=='object')return defaults();
-    const studied=raw.studied&&typeof raw.studied==='object'?raw.studied:{};
-    const recent=Array.isArray(raw.recent)?raw.recent:[];
-    const daily=raw.daily&&typeof raw.daily==='object'?raw.daily:{};
-    const dailyProgress=raw.dailyProgress&&typeof raw.dailyProgress==='object'?raw.dailyProgress:null;
-    // Só vitórias comprovadas bloqueiam uma resposta.
-    // Ignora seenWords das versões antigas: esse campo também registrava derrotas e abandonos.
-    const solvedWords=[...new Set([
-      ...(Array.isArray(raw.solvedWords)?raw.solvedWords:[]),
-      ...Object.entries(studied).filter(([,entry])=>entry?.won===true||Number(entry?.wins)>0).map(([word])=>word),
-      ...Object.values(daily).filter(entry=>entry?.won===true).map(entry=>entry.word)
-    ].filter(word=>typeof word==='string'&&word).map(normalize))];
-    const migrated={...defaults(),...raw,studied,recent,daily,dailyProgress,solvedWords,
-      favorites:Array.isArray(raw.favorites)?raw.favorites:[]};
-    delete migrated.seenWords;
-    // Versão atual: estatísticas derivadas exclusivamente das 86 respostas mantidas.
-    // Partidas antigas de conceitos removidos não são consideradas, inclusive derrotas.
-    const statsVersion='current-86-v2';
-    migrated.solvedWords=solvedWords.filter(key=>WORD_BY_KEY.has(key)&&
-      (studied[key]?.won===true||Number(studied[key]?.wins)>0));
-    if(migrated.statsVersion!==statsVersion){
-      const totals=activeStatistics(studied);
-      migrated.played=totals.played;
-      migrated.wins=totals.wins;
-      migrated.statsVersion=statsVersion;
+    const sourceStudied=raw.studied&&typeof raw.studied==='object'?raw.studied:{};
+    const version='current-86-v3';
+    const studied={};
+    for(const [word,entry] of Object.entries(sourceStudied)){
+      const key=normalize(word);
+      if(!WORD_BY_KEY.has(key)||!entry||typeof entry!=='object')continue;
+      const oldWins=Math.max(0,Math.floor(Number(entry.wins)||0));
+      const won=entry.won===true||oldWins>0;
+      const uniqueWin=won?1:0;
+      const oldPlays=Math.max(0,Math.floor(Number(entry.plays)||0));
+      const losses=Math.max(0,oldPlays-Math.max(oldWins,uniqueWin));
+      // Elimina vitórias repetidas também do registro de partidas da palavra.
+      // Mantém as derrotas e permite uma única vitória por conceito.
+      studied[key]={...entry,plays:losses+uniqueWin,wins:uniqueWin,won};
     }
+    const stats=activeStatistics(studied);
+    const solvedWords=Object.keys(studied).filter(key=>studied[key].won===true);
+    const favorites=(Array.isArray(raw.favorites)?raw.favorites:[])
+      .map(normalize).filter(key=>WORD_BY_KEY.has(key));
+    const recent=(Array.isArray(raw.recent)?raw.recent:[])
+      .map(normalize).filter(key=>WORD_BY_KEY.has(key));
+    const migrated={
+      ...defaults(),...raw,studied,solvedWords,
+      favorites:[...new Set(favorites)],recent,
+      played:stats.played,wins:stats.wins,statsVersion:version,
+      streak:Math.min(Math.max(0,Number(raw.streak)||0),stats.wins),
+      bestStreak:Math.min(Math.max(0,Number(raw.bestStreak)||0),stats.wins)
+    };
+    delete migrated.seenWords;
+    // Não reconstrói totais a partir dos contadores globais antigos:
+    // apenas os registros individuais das 86 respostas são a fonte de verdade.
     return migrated;
   }catch{return defaults();}
 }
@@ -951,7 +962,7 @@ function show(view,tab){document.querySelectorAll('.view').forEach(el=>el.classL
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimeout);toastTimeout=setTimeout(()=>el.classList.remove('show'),2600);}
 function confirmExit(){if(round?.revealing){toast('Acompanhe a revelação das letras antes de sair.');return false;}if(round&&!round.done&&document.getElementById('game').classList.contains('active')){return window.confirm('Sair da partida? As tentativas desta palavra não serão salvas.');}return true;}
 function exitCurrent(view='home'){if(!confirmExit())return;round=null;session=null;reviewOnly=false;show(view);}
-function updateHome(){const stats=activeStatistics(store.studied);$('homeStats').innerHTML=`<div class="stat"><b>${stats.played}</b><span>Partidas</span></div><div class="stat"><b>${stats.wins}</b><span>Vitórias</span></div><div class="stat"><b>${stats.discovered}</b><span>Descobertas</span></div><div class="stat"><b>${stats.defeatedWords}</b><span>Derrotas</span></div>`;$('freeStart').disabled=unsolvedPool(CONCEPTS).length===0;const noHints=$('noHintsFromHome');if(noHints)noHints.disabled=unsolvedPool(CONCEPTS.filter(c=>c.level===3)).length===0;}
+function updateHome(){const stats=activeStatistics(store.studied);$('homeStats').innerHTML=`<div class="stat"><b>${stats.played}</b><span>Partidas</span></div><div class="stat"><b>${stats.wins}</b><span>Vitórias</span></div><div class="stat"><b>${stats.discovered}</b><span>Descobertas</span></div><div class="stat"><b>${stats.losses}</b><span>Derrotas</span></div>`;$('freeStart').disabled=unsolvedPool(CONCEPTS).length===0;const noHints=$('noHintsFromHome');if(noHints)noHints.disabled=unsolvedPool(CONCEPTS.filter(c=>c.level===3)).length===0;}
 function setupTopics(){for(const topic of TOPICS){const o=document.createElement('option');o.value=o.textContent=topic;$('topicSelect').appendChild(o);}updatePoolInfo();}
 function updatePoolInfo(){
   const allFresh=unsolvedPool(CONCEPTS);
@@ -1216,19 +1227,17 @@ function openReview(key){const c=WORD_BY_KEY.get(key);if(!c)return;session=null;
 function renderCollection(){
   const items=CONCEPTS.filter(c=>store.studied[normalize(c.word)]);
   const stats=activeStatistics(store.studied);
-  $('collectionSummary').textContent=`${stats.discovered} descobertas · ${stats.defeatedWords} palavras não acertadas · ${items.length} estudadas`;
+  $('collectionSummary').textContent=`${stats.discovered} descobertas · ${stats.losses} derrotas · ${stats.played} partidas`;
   $('collectionBar').style.width=`${Math.round(items.length/CONCEPTS.length*100)}%`;
   document.querySelectorAll('[data-collection-filter]').forEach(button=>{
     const active=button.dataset.collectionFilter===collectionFilter;
     button.classList.toggle('active',active);
     button.setAttribute('aria-pressed',String(active));
   });
-  const term=normalize($('collectionSearch').value);
   const visible=items.filter(c=>{
     const key=normalize(c.word),entry=store.studied[key],won=entry.won===true||Number(entry.wins)>0;
-    if(term&&!normalize(c.word).includes(term)&&!normalize(c.topic).includes(term))return false;
     if(collectionFilter==='won')return won;
-    if(collectionFilter==='lost')return !won&&Number(entry.plays)>0;
+    if(collectionFilter==='lost')return Number(entry.plays)>Number(entry.wins)||(!won&&Number(entry.plays)>0);
     if(collectionFilter==='favorite')return store.favorites.includes(key);
     return true;
   }).sort((a,b)=>(store.studied[normalize(b.word)]?.last||'').localeCompare(store.studied[normalize(a.word)]?.last||''));
@@ -1247,7 +1256,8 @@ function renderCollection(){
     const icon=document.createElement('span');icon.className='collect-icon';icon.textContent=c.word[0];
     const info=document.createElement('div');info.className='collect-info';
     const title=document.createElement('strong');title.textContent=displayWord(c.word);
-    const sub=document.createElement('small');sub.textContent=`${c.topic} · ${won?'Descoberta':'Não acertada — estude e tente novamente'}`;
+    const losses=Math.max(0,(Number(entry.plays)||0)-(Number(entry.wins)||0));
+    const sub=document.createElement('small');sub.textContent=`${c.topic} · ${won?'Descoberta': 'Ainda não acertada'}${losses?' · '+losses+' derrota'+(losses>1?'s':''):''}`;
     info.append(title,sub);
     const actions=document.createElement('div');actions.className='collect-actions';
     const fav=document.createElement('button');fav.className='small-btn'+(favorite?' fav':'');
@@ -1258,7 +1268,7 @@ function renderCollection(){
     actions.append(fav,open);card.append(icon,info,actions);host.appendChild(card);
   }
 }
-function bind(){document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click',()=>{const tab=button.dataset.tab;if(!confirmExit())return;round=null;session=null;reviewOnly=false;show(tab);}));$('homeButton').addEventListener('click',()=>exitCurrent('home'));$('helpClose').addEventListener('click',()=>{$('helpDialog').close();});$('freeStart').addEventListener('click',openSetup);const nh=$('noHintsFromHome'); if(nh) nh.addEventListener('click',beginNoHints);$('setupBack').addEventListener('click',()=>show('home'));document.querySelectorAll('[data-level]').forEach(button=>button.addEventListener('click',()=>{selectedLevel=+button.dataset.level;document.querySelectorAll('[data-level]').forEach(b=>b.classList.toggle('active',b===button));updatePoolInfo();}));$('topicSelect').addEventListener('change',()=>{selectedTopic=$('topicSelect').value;updatePoolInfo();});$('startGame').addEventListener('click',beginFree);$('exitGame').addEventListener('click',()=>exitCurrent('home'));document.addEventListener('keydown',e=>{if($('helpDialog').open||!document.getElementById('game').classList.contains('active'))return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='Enter'||e.key==='Backspace'||/^[a-zA-ZÀ-ÿ]$/.test(e.key)){e.preventDefault();handleKey(e.key);}});document.querySelectorAll('[data-lesson]').forEach(button=>button.addEventListener('click',()=>{if(lessonTab===button.dataset.lesson)return;lessonTab=button.dataset.lesson;document.querySelectorAll('[data-lesson]').forEach(b=>b.classList.toggle('active',b===button));renderLesson(true);}));$('discoveryContinue').addEventListener('click',continueAfterDiscovery);$('discoveryCollection').addEventListener('click',()=>{round=null;session=null;reviewOnly=false;show('collection');});$('collectionSearch').addEventListener('input',renderCollection);document.querySelectorAll('[data-collection-filter]').forEach(button=>button.addEventListener('click',()=>{collectionFilter=button.dataset.collectionFilter;renderCollection();}));}
+function bind(){document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click',()=>{const tab=button.dataset.tab;if(!confirmExit())return;round=null;session=null;reviewOnly=false;show(tab);}));$('homeButton').addEventListener('click',()=>exitCurrent('home'));$('helpClose').addEventListener('click',()=>{$('helpDialog').close();});$('freeStart').addEventListener('click',openSetup);const nh=$('noHintsFromHome'); if(nh) nh.addEventListener('click',beginNoHints);$('setupBack').addEventListener('click',()=>show('home'));document.querySelectorAll('[data-level]').forEach(button=>button.addEventListener('click',()=>{selectedLevel=+button.dataset.level;document.querySelectorAll('[data-level]').forEach(b=>b.classList.toggle('active',b===button));updatePoolInfo();}));$('topicSelect').addEventListener('change',()=>{selectedTopic=$('topicSelect').value;updatePoolInfo();});$('startGame').addEventListener('click',beginFree);$('exitGame').addEventListener('click',()=>exitCurrent('home'));document.addEventListener('keydown',e=>{if($('helpDialog').open||!document.getElementById('game').classList.contains('active'))return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='Enter'||e.key==='Backspace'||/^[a-zA-ZÀ-ÿ]$/.test(e.key)){e.preventDefault();handleKey(e.key);}});document.querySelectorAll('[data-lesson]').forEach(button=>button.addEventListener('click',()=>{if(lessonTab===button.dataset.lesson)return;lessonTab=button.dataset.lesson;document.querySelectorAll('[data-lesson]').forEach(b=>b.classList.toggle('active',b===button));renderLesson(true);}));$('discoveryContinue').addEventListener('click',continueAfterDiscovery);$('discoveryCollection').addEventListener('click',()=>{round=null;session=null;reviewOnly=false;show('collection');});document.querySelectorAll('[data-collection-filter]').forEach(button=>button.addEventListener('click',()=>{collectionFilter=button.dataset.collectionFilter;renderCollection();}));}
 window.addEventListener('storage',e=>{if(e.key!==STORE_KEY)return;store=loadStore();updateHome();if($('setup').classList.contains('active'))updatePoolInfo();if($('collection').classList.contains('active'))renderCollection();});
 setupTopics();bind();updateHome();loadPortugueseDictionary();window.addEventListener('online',()=>{if(dictionaryState==='failed')loadPortugueseDictionary();});
 
