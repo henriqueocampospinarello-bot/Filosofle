@@ -38,7 +38,7 @@ jobs:
           assert(!html.includes('id="journeyChallenge"'),'A trilha foi mantida indevidamente.');
           assert(!html.includes('id="dailyFromHome"'),'Desafio diário ainda aparece na página inicial.');
           assert(html.includes('id="noHintsFromHome"'),'Botão Sem pistas ausente.');
-          assert(html.includes('CONCEPTS.filter(c=>store.studied[normalize(c.word)]?.won===true).length'),'Descobertas incluem palavras de versões antigas.');
+          assert(html.includes('const stats=activeStatistics(store.studied)'),'Estatísticas não estão restritas às respostas atuais.');
           assert(html.includes('data-collection-filter="lost"'),'A coleção precisa separar derrotas e descobertas.');
           assert(html.includes('current-86-v2'),'A correção de vitórias atuais está ausente.');
           assert(html.includes('activeStatistics(store.studied)'),'O contador por palavras atuais está ausente.');
