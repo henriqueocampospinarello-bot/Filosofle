@@ -34,6 +34,11 @@ jobs:
           assert.equal(set.size,words.length,'Existem palavras duplicadas.');
           for(const removed of ['ÁGUA','TEATRO','RESÍDUO','ROBÔ','MÚSICA','CINEMA','AMOSTRA','DADOS','NEGAÇÃO'])assert(!set.has(norm(removed)), 'Resposta inadequada: '+removed);
           for(const w of words)assert(norm(w.word).length>=1&&norm(w.word).length<=10,'Palavra com tamanho inválido: '+w.word);
+          assert(!html.includes('data-tab="challenges"'),'A aba Desafios não deveria aparecer.');
+          assert(!html.includes('id="journeyChallenge"'),'A trilha foi mantida indevidamente.');
+          assert(!html.includes('id="dailyFromHome"'),'Desafio diário ainda aparece na página inicial.');
+          assert(html.includes('id="noHintsFromHome"'),'Botão Sem pistas ausente.');
+          assert(html.includes('CONCEPTS.filter(c=>store.studied[normalize(c.word)]?.won===true).length'),'Descobertas incluem palavras de versões antigas.');
           const topics=[...new Set(words.map(w=>w.topic))];
           assert.equal(topics.length,6,'O jogo deve conter seis áreas após a curadoria.');
           for(const topic of topics)assert(words.filter(w=>w.topic===topic).length>=10,'Área com menos de 10 conceitos: '+topic);
@@ -80,7 +85,7 @@ jobs:
           // Paradigma é aceito depois de ser carregado dos dicionários, sem voltar a ser resposta do jogo.
           assert(!dictCtx.checkWord('PARADIGMA'),'Paradigma não deve ser resposta pré-carregada.');
           vm.runInContext("VALID_GUESSES.add('PARADIGMA');",dictCtx);
-          for(const w of ['PARADIGMA','PARADIGMAS','VIRTUDES','HIPOTESES','NARRATIVAS','PENSANDO','AÇÕES'])assert(dictCtx.checkWord(w),'Forma legítima recusada: '+w);
+          for(const w of ['PARADIGMA','PARADIGMAS','VIRTUDES','HIPOTESES','NARRATIVAS','PENSANDO','AÇÕES','ASSASSINO','ASSASSINA'])assert(dictCtx.checkWord(w),'Forma legítima recusada: '+w);
           for(const w of ['XPTOZZ','PARADIGMZZ','PQZXWR']){
             console.log('VERIFICAÇÃO NEGATIVA',w,'normalização',dictCtx.normalizer(w),'aceita',dictCtx.checkWord(w));
             assert(!dictCtx.checkWord(w),'Palavra inventada aceita: '+w);

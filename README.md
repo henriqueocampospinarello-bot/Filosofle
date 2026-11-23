@@ -8,6 +8,8 @@ Veja a lista completa de respostas em [PALAVRAS.md](PALAVRAS.md). O banco de res
 
 Abra `index.html` no navegador ou use o endereço do GitHub Pages após a publicação.
 
+O jogo oferece Jogo livre e Sem pistas, sem uma aba separada de desafios. As descobertas contam apenas conceitos acertados que ainda estão no banco atual. Partidas e vitórias continuam registradas como histórico geral.
+
 O jogo é feito com HTML, CSS e JavaScript. A versão publicada é um arquivo único, sem necessidade de instalar pacotes, criar conta ou configurar servidor. O progresso é armazenado localmente no navegador.
 
 ## Publicação
@@ -26,6 +28,6 @@ O jogo reúne **três fontes de vocabulário diferentes**, carregadas de forma i
 2. **[fserb/pt-br](https://github.com/fserb/pt-br):** léxico geral e arquivo adicional de conjugações verbais (MIT).
 3. **[palavras-ptbr, de Gerson Locci](https://github.com/gelocci/palavras-ptbr):** lista por frequência de uso, baseada em corpora da Leipzig Corpora Collection. Licença CC BY 4.0; crédito a Gerson Locci e aos dados da Leipzig. Somente as entradas classificadas como `correto` entram na validação.
 
-As listas são combinadas **somente para validar tentativas**, nunca para ampliar as 100 respostas filosóficas. O jogo também reconhece plurais regulares a partir de formas singulares já registradas (como *paradigmas*, *animais*, *homens*, *flores*) e inclui flexões comuns diretamente (*ações*, *pensando*, *agiu*). Uma tentativa ausente de todas as bases não consome chance; enquanto um dos dicionários ainda carrega, o jogo pede para repetir a tentativa. A cobertura é ampla, mas não garante todas as flexões, regionalismos ou neologismos.
+As listas são combinadas **somente para validar tentativas**, nunca para ampliar as 86 respostas filosóficas. O jogo também reconhece plurais regulares a partir de formas singulares já registradas (como *paradigmas*, *animais*, *homens*, *flores*) e inclui flexões comuns diretamente (*ações*, *pensando*, *agiu*, *assassino*, *assassina*). Uma tentativa ausente de todas as bases não consome chance; enquanto um dos dicionários ainda carrega, o jogo pede para repetir a tentativa. A cobertura é ampla, mas não garante todas as flexões, regionalismos ou neologismos.
 
 O tamanho do dicionário não é apresentado na interface do jogo. Em caso de falha no carregamento, o site pede conexão para validar palavras que não estejam no banco dos próprios conceitos filosóficos.
