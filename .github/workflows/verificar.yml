@@ -39,6 +39,19 @@ jobs:
           assert(!html.includes('id="dailyFromHome"'),'Desafio diário ainda aparece na página inicial.');
           assert(html.includes('id="noHintsFromHome"'),'Botão Sem pistas ausente.');
           assert(html.includes('CONCEPTS.filter(c=>store.studied[normalize(c.word)]?.won===true).length'),'Descobertas incluem palavras de versões antigas.');
+          assert(html.includes('data-collection-filter="lost"'),'A coleção precisa separar derrotas e descobertas.');
+          assert(html.includes('current-86-v2'),'A correção de vitórias atuais está ausente.');
+          assert(html.includes('activeStatistics(store.studied)'),'O contador por palavras atuais está ausente.');
+          const detailCtx=vm.createContext({});
+          vm.runInContext(scripts[0],detailCtx);
+          for(const topic of ['etica','conhecimento','logica','politica','metafisica','tradicoes']){
+            const path='conteudos/'+topic+'.js';
+            assert(fs.existsSync(path),'Aprofundamento ausente: '+path);
+            vm.runInContext(fs.readFileSync(path,'utf8'),detailCtx);
+          }
+          vm.runInContext(';globalThis.DEEPS=CONCEPTS.map(c=>({word:c.word,parts:[c.deepOrigin,c.deepConnection,c.deepDebate]}));',detailCtx);
+          assert.equal(detailCtx.DEEPS.length,86);
+          for(const c of detailCtx.DEEPS)for(const part of c.parts)assert(typeof part==='string'&&part.length>=110,'Aprofundamento insuficiente: '+c.word);
           const topics=[...new Set(words.map(w=>w.topic))];
           assert.equal(topics.length,6,'O jogo deve conter seis áreas após a curadoria.');
           for(const topic of topics)assert(words.filter(w=>w.topic===topic).length>=10,'Área com menos de 10 conceitos: '+topic);
